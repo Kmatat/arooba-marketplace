@@ -31,5 +31,9 @@ public class RateCardConfiguration : IEntityTypeConfiguration<RateCard>
         builder.Property(r => r.PricePerKg).HasPrecision(18, 2);
 
         builder.Ignore(r => r.DomainEvents);
+        builder.Ignore(r => r.OriginZoneId);
+        builder.Ignore(r => r.DestinationZoneId);
+        builder.Ignore(r => r.BaseFee);
+        builder.Ignore(r => r.PerKgRate);
     }
 }

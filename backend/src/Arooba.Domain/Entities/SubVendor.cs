@@ -16,4 +16,10 @@ public class SubVendor : AuditableEntity
     public string Email { get; set; } = string.Empty;
     public string NationalId { get; set; } = string.Empty;
     public Guid UserId { get; set; }
+    public UpliftType? UpliftType { get; set; }
+    public decimal? UpliftValue { get; set; }
+    public decimal? CustomUpliftOverride { get; set; }
+
+    /// <summary>Navigation property to products listed by this sub-vendor.</summary>
+    public List<Product>? Products { get; set; }
 }

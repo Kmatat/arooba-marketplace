@@ -1,3 +1,4 @@
+using Arooba.Application.Common.Interfaces;
 using Arooba.Application.Common.Models;
 
 namespace Arooba.Application.Services;
@@ -7,7 +8,7 @@ namespace Arooba.Application.Services;
 /// Calculates final customer-facing prices using the 4-bucket financial model,
 /// shipping fees, escrow release dates, and price deviation checks.
 /// </summary>
-public class PricingService
+public class PricingService : IPricingService
 {
     private const decimal VatRate = 0.14m;
     private const decimal CooperativeFeeRate = 0.05m;
@@ -188,6 +189,16 @@ public class PricingService
             var c when c.Contains("fragile") => FragileUpliftRate,
             _ => MvpFlatUpliftRate
         };
+    }
+
+    /// <summary>
+    /// Rounds a price up to the nearest customer-friendly increment (5 EGP).
+    /// </summary>
+    /// <param name="price">The raw price to round.</param>
+    /// <returns>The customer-friendly rounded price.</returns>
+    public decimal RoundToFriendlyPrice(decimal price)
+    {
+        return Math.Ceiling(price / 5m) * 5m;
     }
 
     private static decimal CalculateParentUplift(PricingInput input)

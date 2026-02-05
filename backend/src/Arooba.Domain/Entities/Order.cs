@@ -11,12 +11,24 @@ public class Order : AuditableEntity
 {
     public string OrderNumber { get; set; } = string.Empty;
     public Guid CustomerId { get; set; }
+    public string CustomerName { get; set; } = string.Empty;
     public OrderStatus Status { get; set; } = OrderStatus.Pending;
+    public decimal Subtotal { get; set; }
+    public decimal TotalDeliveryFee { get; set; }
     public decimal TotalAmount { get; set; }
     public decimal ShippingFee { get; set; }
     public decimal VatAmount { get; set; }
     public PaymentMethod PaymentMethod { get; set; }
+    public string? DeliveryAddress { get; set; }
+    public string? DeliveryCity { get; set; }
+    public string? DeliveryZoneId { get; set; }
     public List<OrderItem> Items { get; set; } = [];
+
+    /// <summary>Navigation property to the customer who placed this order.</summary>
+    public Customer? Customer { get; set; }
+
+    /// <summary>Navigation property to shipments for this order.</summary>
+    public List<Shipment>? Shipments { get; set; }
 
     /// <summary>
     /// Vendor accepts a pending order.

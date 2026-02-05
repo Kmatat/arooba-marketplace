@@ -121,5 +121,8 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .HasMaxLength(100);
 
         builder.Ignore(p => p.DomainEvents);
+        builder.Ignore(p => p.LengthCm);
+        builder.Ignore(p => p.WidthCm);
+        builder.Ignore(p => p.HeightCm);
     }
 }

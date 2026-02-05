@@ -1,10 +1,10 @@
 using Arooba.Application.Common.Interfaces;
-using Arooba.Domain.Enums;
+using Arooba.Application.Common.Models;
 
 namespace Arooba.Infrastructure.Services;
 
 /// <summary>
-/// Implementation of the Arooba Marketplace pricing engine.
+/// Infrastructure implementation of the Arooba Marketplace pricing engine.
 /// This is THE critical business logic service that calculates product prices,
 /// shipping fees, escrow releases, and price deviation flags.
 ///
@@ -13,7 +13,7 @@ namespace Arooba.Infrastructure.Services;
 /// <list type="number">
 ///   <item>Cooperative fee = vendorBasePrice * 0.05 (if non-legalized)</item>
 ///   <item>Price after coop = vendorBasePrice + cooperativeFee</item>
-///   <item>Parent uplift = fixed or percentage of priceAfterCoop</item>
+///   <item>Parent uplift = fixed or percentage of vendorBasePrice</item>
 ///   <item>Marketplace uplift = priceAfterCoop * categoryRate (or MVP flat 20%)</item>
 ///   <item>Minimum uplift rule: 15 EGP floor</item>
 ///   <item>Low-price rule: items under 100 EGP get max(calculated, 20 EGP)</item>
@@ -28,10 +28,6 @@ namespace Arooba.Infrastructure.Services;
 /// </summary>
 public class PricingService : IPricingService
 {
-    // ──────────────────────────────────────────────
-    // BUSINESS CONSTANTS
-    // ──────────────────────────────────────────────
-
     /// <summary>Egyptian VAT rate: 14%.</summary>
     private const decimal VatRate = 0.14m;
 
@@ -40,9 +36,6 @@ public class PricingService : IPricingService
 
     /// <summary>MVP flat marketplace uplift rate: 20%.</summary>
     private const decimal MvpFlatRate = 0.20m;
-
-    /// <summary>Fragile product uplift override: 25%.</summary>
-    private const decimal FragileOverride = 0.25m;
 
     /// <summary>Minimum fixed uplift in EGP to protect margin on cheap items.</summary>
     private const decimal MinimumFixedUplift = 15m;
@@ -78,16 +71,7 @@ public class PricingService : IPricingService
         ["food-essentials"] = 0.12m,
     };
 
-    // ──────────────────────────────────────────────
-    // CORE PRICING CALCULATION
-    // ──────────────────────────────────────────────
-
     /// <inheritdoc />
-    /// <remarks>
-    /// Implements the complete Additive Uplift Model as specified in the Arooba business rules.
-    /// All monetary calculations use <see cref="Math.Round(decimal, int, MidpointRounding)"/>
-    /// with 2 decimal places and <see cref="MidpointRounding.AwayFromZero"/>.
-    /// </remarks>
     public PricingResult CalculatePrice(PricingInput input)
     {
         ArgumentNullException.ThrowIfNull(input);
@@ -96,223 +80,177 @@ public class PricingService : IPricingService
 
         // Step 1: Calculate Cooperative Fee (only for non-legalized vendors)
         var cooperativeFee = input.IsNonLegalizedVendor
-            ? vendorBasePrice * CooperativeFeeRate
+            ? Round(vendorBasePrice * CooperativeFeeRate)
             : 0m;
 
         var priceAfterCoop = vendorBasePrice + cooperativeFee;
 
         // Step 2: Calculate Parent Vendor Uplift (if sub-vendor product)
-        var parentVendorUplift = 0m;
-        if (input.ParentUpliftType.HasValue && input.ParentUpliftValue.HasValue && input.ParentUpliftValue.Value > 0)
-        {
-            parentVendorUplift = input.ParentUpliftType.Value == UpliftType.Fixed
-                ? input.ParentUpliftValue.Value
-                : priceAfterCoop * input.ParentUpliftValue.Value;
-        }
+        var parentUplift = CalculateParentUplift(input);
 
-        // Step 3: Calculate Marketplace Uplift
-        var upliftRate = input.CustomUpliftOverride
-            ?? (CategoryDefaultRates.TryGetValue(input.CategoryId, out var categoryRate)
+        // Step 3: Determine uplift rate and calculate marketplace uplift
+        decimal marketplaceUplift;
+        decimal upliftRate;
+
+        if (input.CustomUpliftOverride.HasValue)
+        {
+            marketplaceUplift = input.CustomUpliftOverride.Value;
+            upliftRate = vendorBasePrice > 0
+                ? marketplaceUplift / vendorBasePrice
+                : 0m;
+        }
+        else
+        {
+            upliftRate = CategoryDefaultRates.TryGetValue(input.CategoryId, out var categoryRate)
                 ? categoryRate
-                : MvpFlatRate);
+                : MvpFlatRate;
 
-        var marketplaceUplift = priceAfterCoop * upliftRate;
+            marketplaceUplift = Round(priceAfterCoop * upliftRate);
 
-        // Step 3b: Apply Minimum Uplift Rule (15 EGP floor)
-        if (marketplaceUplift < MinimumFixedUplift)
-        {
-            marketplaceUplift = MinimumFixedUplift;
+            // Apply Minimum Uplift Rule (15 EGP floor)
+            marketplaceUplift = Math.Max(marketplaceUplift, MinimumFixedUplift);
+
+            // For items under the low-price threshold, use max(calculated, 20 EGP fixed)
+            if (vendorBasePrice < LowPriceThreshold)
+            {
+                marketplaceUplift = Math.Max(marketplaceUplift, LowPriceFixedMarkup);
+            }
         }
 
-        // Step 3c: For items under the low-price threshold, use max(calculated, 20 EGP fixed)
-        if (vendorBasePrice < LowPriceThreshold)
-        {
-            marketplaceUplift = Math.Max(marketplaceUplift, LowPriceFixedMarkup);
-        }
-
-        // Step 4: Logistics Surcharge (SmartCom Buffer)
+        // Step 4: Logistics Surcharge
         var logisticsSurcharge = LogisticsSurchargeAmount;
 
         // Step 5: Bucket A — Vendor Revenue (base price + parent uplift)
-        var bucketA = vendorBasePrice + parentVendorUplift;
+        var bucketA = vendorBasePrice + parentUplift;
 
         // Step 6: Bucket B — Vendor VAT (only if vendor is VAT registered)
-        var bucketB = input.IsVendorVatRegistered ? bucketA * VatRate : 0m;
+        var bucketB = input.IsVendorVatRegistered ? Round(bucketA * VatRate) : 0m;
 
         // Step 7: Bucket C — Arooba Revenue (coop fee + marketplace uplift + logistics surcharge)
         var bucketC = cooperativeFee + marketplaceUplift + logisticsSurcharge;
 
         // Step 8: Bucket D — Arooba VAT (always applies to Arooba's share)
-        var bucketD = bucketC * VatRate;
+        var bucketD = Round(bucketC * VatRate);
 
-        // Step 9: Final Price (excluding delivery — that's Bucket E)
+        // Step 9: Final Price
         var finalPrice = bucketA + bucketB + bucketC + bucketD;
 
-        // Step 10: Calculate Arooba margins
-        var aroobaGrossMargin = bucketC;
-        var aroobaMarginPercent = finalPrice > 0
-            ? (aroobaGrossMargin / finalPrice) * 100m
+        // Step 10: Summary metrics
+        var vendorNetPayout = vendorBasePrice;
+        var totalVat = bucketB + bucketD;
+        var aroobaTotalMargin = bucketC;
+        var effectiveMarginPercent = finalPrice > 0
+            ? Round(aroobaTotalMargin / finalPrice * 100m)
             : 0m;
 
-        return new PricingResult
-        {
-            FinalPrice = Round(finalPrice),
-            VendorBasePrice = vendorBasePrice,
-            CooperativeFee = Round(cooperativeFee),
-            ParentVendorUplift = Round(parentVendorUplift),
-            MarketplaceUplift = Round(marketplaceUplift),
-            LogisticsSurcharge = logisticsSurcharge,
-            VendorVat = Round(bucketB),
-            AroobaVat = Round(bucketD),
-            BucketA_VendorRevenue = Round(bucketA),
-            BucketB_VendorVat = Round(bucketB),
-            BucketC_AroobaRevenue = Round(bucketC),
-            BucketD_AroobaVat = Round(bucketD),
-            AroobaGrossMargin = Round(aroobaGrossMargin),
-            AroobaMarginPercent = Round(aroobaMarginPercent),
-        };
+        return new PricingResult(
+            FinalPrice: finalPrice,
+            VendorBasePrice: vendorBasePrice,
+            CooperativeFee: cooperativeFee,
+            ParentUpliftAmount: parentUplift,
+            MarketplaceUplift: marketplaceUplift,
+            LogisticsSurcharge: logisticsSurcharge,
+            BucketA_VendorRevenue: bucketA,
+            BucketB_VendorVat: bucketB,
+            BucketC_AroobaRevenue: bucketC,
+            BucketD_AroobaVat: bucketD,
+            VendorNetPayout: vendorNetPayout,
+            CommissionRate: upliftRate,
+            VatRate: VatRate,
+            TotalVatAmount: totalVat,
+            AroobaTotalMargin: aroobaTotalMargin,
+            EffectiveMarginPercent: effectiveMarginPercent
+        );
     }
 
-    // ──────────────────────────────────────────────
-    // SHIPPING FEE CALCULATION
-    // ──────────────────────────────────────────────
-
     /// <inheritdoc />
-    /// <remarks>
-    /// Uses the Zone + Weight model:
-    /// <list type="number">
-    ///   <item>Volumetric weight = (L * W * H) / 5000</item>
-    ///   <item>Chargeable weight = max(actual, volumetric)</item>
-    ///   <item>Fee = baseRate + max(0, chargeableWeight - 1) * perKgRate</item>
-    ///   <item>Subsidized fee = max(totalFee - 10, totalFee * 0.75)</item>
-    /// </list>
-    /// </remarks>
     public ShippingFeeResult CalculateShippingFee(ShippingFeeInput input)
     {
         ArgumentNullException.ThrowIfNull(input);
 
         // Volumetric weight = (L x W x H) / 5000
-        var volumetricWeight = (input.DimensionL * input.DimensionW * input.DimensionH) / VolumetricDivisor;
+        var volumetricWeight = Round(
+            (input.LengthCm * input.WidthCm * input.HeightCm) / VolumetricDivisor);
 
         // Chargeable weight = whichever is higher
         var chargeableWeight = Math.Max(input.ActualWeightKg, volumetricWeight);
 
-        // Base fee + excess weight charge (first 1 kg included in base)
-        var excessWeight = Math.Max(0m, chargeableWeight - 1m);
-        var excessWeightFee = excessWeight * input.PerKgRate;
-        var totalFee = input.BaseRate + excessWeightFee;
+        // Base fee for first kg, then extra per additional kg
+        var baseFee = 30m;
+        var extraWeightFee = chargeableWeight > 1
+            ? Round((chargeableWeight - 1) * 10m)
+            : 0m;
+        var totalFee = baseFee + extraWeightFee;
 
-        // SmartCom Buffer: subsidize part of the fee
-        // Customer pays the higher of (totalFee - 10 EGP) or (75% of totalFee)
-        var subsidizedCustomerFee = Math.Max(
-            totalFee - LogisticsSurchargeAmount,
-            totalFee * 0.75m);
-
-        var aroobaSubsidy = totalFee - subsidizedCustomerFee;
-
-        return new ShippingFeeResult
-        {
-            ActualWeight = input.ActualWeightKg,
-            VolumetricWeight = Round(volumetricWeight),
-            ChargeableWeight = Round(chargeableWeight),
-            BaseFee = input.BaseRate,
-            ExcessWeightFee = Round(excessWeightFee),
-            TotalFee = Round(totalFee),
-            SubsidizedCustomerFee = Round(subsidizedCustomerFee),
-            AroobaSubsidy = Round(aroobaSubsidy),
-        };
+        return new ShippingFeeResult(
+            ActualWeightKg: input.ActualWeightKg,
+            VolumetricWeightKg: volumetricWeight,
+            ChargeableWeightKg: chargeableWeight,
+            BaseFee: baseFee,
+            ExtraWeightFee: extraWeightFee,
+            TotalShippingFee: totalFee,
+            AroobaSubsidy: 0m,
+            VendorShippingContribution: 0m,
+            CustomerShippingFee: totalFee
+        );
     }
 
-    // ──────────────────────────────────────────────
-    // ESCROW CALCULATION
-    // ──────────────────────────────────────────────
-
     /// <inheritdoc />
-    /// <remarks>
-    /// After delivery confirmation, funds sit in escrow for 14 days.
-    /// If no return is initiated during this period, funds become withdrawable.
-    /// </remarks>
-    public EscrowReleaseResult CalculateEscrowRelease(DateTime deliveryDate)
+    public EscrowResult CalculateEscrowRelease(DateTime deliveryDate)
     {
         var releaseDate = deliveryDate.AddDays(EscrowHoldDays);
-        var now = DateTime.UtcNow;
-        var daysRemaining = Math.Max(0, (int)Math.Ceiling((releaseDate - now).TotalDays));
+        var isReleased = DateTime.UtcNow >= releaseDate;
 
-        return new EscrowReleaseResult
-        {
-            ReleaseDate = releaseDate,
-            DaysRemaining = daysRemaining,
-            IsReleasable = daysRemaining == 0,
-        };
+        return new EscrowResult(
+            DeliveryDate: deliveryDate,
+            ReleaseDate: releaseDate,
+            HoldDays: EscrowHoldDays,
+            IsReleased: isReleased
+        );
     }
 
-    // ──────────────────────────────────────────────
-    // PRICE DEVIATION CHECK
-    // ──────────────────────────────────────────────
-
     /// <inheritdoc />
-    /// <remarks>
-    /// Any product priced +/-20% from the category average is flagged for manual review.
-    /// This protects customers from price-gouging and maintains marketplace integrity.
-    /// </remarks>
     public PriceDeviationResult CheckPriceDeviation(
         decimal productPrice,
         decimal categoryAvgPrice,
         decimal threshold = 0.20m)
     {
-        if (categoryAvgPrice == 0)
-        {
-            return new PriceDeviationResult
-            {
-                IsFlagged = false,
-                Deviation = 0m,
-                Direction = "normal",
-            };
-        }
+        var deviationPercent = categoryAvgPrice > 0
+            ? Math.Abs(productPrice - categoryAvgPrice) / categoryAvgPrice
+            : 0m;
+        var isFlagged = deviationPercent > threshold;
 
-        var deviation = (productPrice - categoryAvgPrice) / categoryAvgPrice;
-        var isFlagged = Math.Abs(deviation) > threshold;
-
-        var direction = deviation > threshold
-            ? "above"
-            : deviation < -threshold
-                ? "below"
-                : "normal";
-
-        return new PriceDeviationResult
-        {
-            IsFlagged = isFlagged,
-            Deviation = Round(deviation * 100m),
-            Direction = direction,
-        };
+        return new PriceDeviationResult(
+            ProductPrice: productPrice,
+            CategoryAvgPrice: categoryAvgPrice,
+            DeviationPercent: Round(deviationPercent, 4),
+            Threshold: threshold,
+            IsFlagged: isFlagged
+        );
     }
 
-    // ──────────────────────────────────────────────
-    // FRIENDLY PRICE ROUNDING
-    // ──────────────────────────────────────────────
-
     /// <inheritdoc />
-    /// <remarks>
-    /// Rounds up to the nearest 5 EGP for customer-friendly display pricing.
-    /// For example, 46.50 EGP becomes 50 EGP.
-    /// </remarks>
     public decimal RoundToFriendlyPrice(decimal price)
     {
         return Math.Ceiling(price / 5m) * 5m;
     }
 
-    // ──────────────────────────────────────────────
-    // HELPERS
-    // ──────────────────────────────────────────────
-
-    /// <summary>
-    /// Rounds a decimal value to 2 decimal places using banker's rounding away from zero,
-    /// consistent with the TypeScript <c>Math.round(value * 100) / 100</c> approach.
-    /// </summary>
-    /// <param name="value">The value to round.</param>
-    /// <returns>The rounded value with 2 decimal places.</returns>
-    private static decimal Round(decimal value)
+    private static decimal CalculateParentUplift(PricingInput input)
     {
-        return Math.Round(value, 2, MidpointRounding.AwayFromZero);
+        if (input.ParentUpliftType is null || !input.ParentUpliftValue.HasValue)
+            return 0m;
+
+        return input.ParentUpliftType.ToLowerInvariant() switch
+        {
+            "fixed" => input.ParentUpliftValue.Value,
+            "percentage" => Round(
+                input.VendorBasePrice * input.ParentUpliftValue.Value / 100m),
+            _ => 0m
+        };
+    }
+
+    private static decimal Round(decimal value, int decimals = 2)
+    {
+        return Math.Round(value, decimals, MidpointRounding.AwayFromZero);
     }
 }

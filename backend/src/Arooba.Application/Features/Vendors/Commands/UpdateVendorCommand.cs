@@ -110,7 +110,7 @@ public class UpdateVendorCommandHandler : IRequestHandler<UpdateVendorCommand, b
             vendor.IsVatRegistered = request.IsVatRegistered.Value;
         }
 
-        vendor.UpdatedAt = _dateTime.Now;
+        vendor.UpdatedAt = _dateTime.UtcNow;
 
         await _context.SaveChangesAsync(cancellationToken);
 
