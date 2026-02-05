@@ -24,11 +24,11 @@ public record CalculateShippingFeeQuery : IRequest<ShippingFeeResultDto>
     /// <summary>Gets the package height in centimeters.</summary>
     public decimal HeightCm { get; init; }
 
-    /// <summary>Gets the origin shipping zone identifier (pickup).</summary>
-    public Guid OriginZoneId { get; init; }
+    /// <summary>Gets the origin shipping zone identifier (pickup), e.g. "cairo".</summary>
+    public string OriginZoneId { get; init; } = string.Empty;
 
-    /// <summary>Gets the destination shipping zone identifier (delivery).</summary>
-    public Guid DestinationZoneId { get; init; }
+    /// <summary>Gets the destination shipping zone identifier (delivery), e.g. "alexandria".</summary>
+    public string DestinationZoneId { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -203,9 +203,9 @@ public class CalculateShippingFeeQueryValidator : AbstractValidator<CalculateShi
             .GreaterThan(0).WithMessage("Height must be greater than zero.");
 
         RuleFor(q => q.OriginZoneId)
-            .NotEmpty().WithMessage("Origin zone ID is required.");
+            .NotEmpty().WithMessage("Origin zone ID is required (e.g., 'cairo').");
 
         RuleFor(q => q.DestinationZoneId)
-            .NotEmpty().WithMessage("Destination zone ID is required.");
+            .NotEmpty().WithMessage("Destination zone ID is required (e.g., 'alexandria').");
     }
 }

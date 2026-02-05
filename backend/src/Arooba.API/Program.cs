@@ -2,6 +2,7 @@ using System.Text;
 using Arooba.Application;
 using Arooba.Infrastructure;
 using Arooba.Infrastructure.Persistence;
+using Arooba.API.Extensions;
 using Arooba.API.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -20,11 +21,13 @@ builder.Services.AddApplicationServices();
 // Infrastructure layer: EF Core, repositories, external service clients
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
-// Controllers
-builder.Services.AddControllers();
+// API layer: controllers with global exception filter, problem details
+builder.Services.AddApiServices();
+
+// Health checks
+builder.Services.AddAroobaHealthChecks();
 
 // Swagger / OpenAPI
-builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
@@ -143,5 +146,6 @@ app.UseCors("AroobaPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();

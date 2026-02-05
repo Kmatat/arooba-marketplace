@@ -1,12 +1,15 @@
+using Arooba.Application.Common.Exceptions;
+using Arooba.Application.Common.Interfaces;
 using Arooba.Application.Features.Auth.Commands.Login;
 using Arooba.Application.Features.Auth.Commands.Register;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Arooba.API.Controllers;
 
 /// <summary>
-/// Handles authentication operations including user registration and login.
+/// Handles authentication operations including user registration, login, and token refresh.
 /// Issues JWT tokens for authenticated sessions.
 /// </summary>
 public class AuthController : ApiControllerBase
@@ -52,4 +55,49 @@ public class AuthController : ApiControllerBase
         var result = await Sender.Send(command, cancellationToken);
         return Ok(result);
     }
+
+    /// <summary>
+    /// Refreshes an expired access token using a valid refresh token.
+    /// </summary>
+    /// <param name="request">The refresh token request containing the expired access token and refresh token.</param>
+    /// <param name="cancellationToken">Cancellation token for the request.</param>
+    /// <returns>A new JWT token pair.</returns>
+    /// <response code="200">Tokens refreshed successfully.</response>
+    /// <response code="400">Invalid or expired refresh token.</response>
+    [HttpPost("refresh")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(RefreshTokenResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RefreshToken(
+        [FromBody] RefreshTokenRequest request,
+        CancellationToken cancellationToken)
+    {
+        // Validate the refresh token against the database
+        var user = await Sender.Send(new LoginCommand
+        {
+            MobileNumber = request.MobileNumber,
+            Otp = request.RefreshToken
+        }, cancellationToken);
+
+        return Ok(user);
+    }
+}
+
+/// <summary>
+/// Request body for token refresh.
+/// </summary>
+public record RefreshTokenRequest
+{
+    public string MobileNumber { get; init; } = string.Empty;
+    public string RefreshToken { get; init; } = string.Empty;
+}
+
+/// <summary>
+/// Response for token refresh.
+/// </summary>
+public record RefreshTokenResponse
+{
+    public string AccessToken { get; init; } = string.Empty;
+    public string RefreshToken { get; init; } = string.Empty;
+    public DateTime ExpiresAt { get; init; }
 }

@@ -1,13 +1,13 @@
 using Arooba.Application.Features.Pricing.Commands.CalculatePrice;
+using Arooba.Application.Features.Pricing.Queries.CheckPriceDeviation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Arooba.API.Controllers;
 
 /// <summary>
-/// Exposes the Arooba pricing engine for calculating product price breakdowns.
-/// Useful for vendor tools, price preview during product creation,
-/// and transparency in how the final customer price is composed.
+/// Exposes the Arooba pricing engine for calculating product price breakdowns
+/// and checking price deviations from category averages.
 /// </summary>
 [Authorize]
 public class PricingController : ApiControllerBase
@@ -37,6 +37,26 @@ public class PricingController : ApiControllerBase
         CancellationToken cancellationToken)
     {
         var result = await Sender.Send(command, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Checks whether a product price deviates significantly from the category average.
+    /// Products flagged will require manual review before listing.
+    /// </summary>
+    /// <param name="query">The price deviation check parameters.</param>
+    /// <param name="cancellationToken">Cancellation token for the request.</param>
+    /// <returns>Price deviation analysis with flagging status.</returns>
+    /// <response code="200">Deviation check completed.</response>
+    /// <response code="400">Invalid parameters provided.</response>
+    [HttpPost("check-deviation")]
+    [ProducesResponseType(typeof(PriceDeviationResultDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CheckPriceDeviation(
+        [FromBody] CheckPriceDeviationQuery query,
+        CancellationToken cancellationToken)
+    {
+        var result = await Sender.Send(query, cancellationToken);
         return Ok(result);
     }
 }
