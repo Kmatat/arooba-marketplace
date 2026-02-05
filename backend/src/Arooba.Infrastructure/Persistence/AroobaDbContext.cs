@@ -1,20 +1,21 @@
-using System.Text.Json;
 using Arooba.Application.Common.Interfaces;
 using Arooba.Domain.Common;
 using Arooba.Domain.Entities;
+using Arooba.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Arooba.Infrastructure.Persistence;
 
 /// <summary>
 /// Entity Framework Core DbContext for the Arooba Marketplace database.
-/// Implements <see cref="IApplicationDbContext"/> to expose typed DbSet properties
-/// and automatically manages audit timestamps on tracked entities.
+/// Implements both <see cref="IAroobaDbContext"/> (Domain) and <see cref="IApplicationDbContext"/>
+/// (Application) to expose typed DbSet properties. Automatically manages audit timestamps
+/// on tracked entities that derive from <see cref="BaseEntity"/> or <see cref="AuditableEntity"/>.
 /// </summary>
-public class AroobaDbContext : DbContext, IApplicationDbContext
+public class AroobaDbContext : DbContext, IAroobaDbContext, IApplicationDbContext
 {
-    private readonly IDateTimeService _dateTime;
-    private readonly ICurrentUserService _currentUser;
+    private readonly Domain.Interfaces.IDateTimeService _dateTime;
+    private readonly Domain.Interfaces.ICurrentUserService _currentUser;
 
     /// <summary>
     /// Initializes a new instance of <see cref="AroobaDbContext"/> with the specified options
@@ -25,8 +26,8 @@ public class AroobaDbContext : DbContext, IApplicationDbContext
     /// <param name="currentUser">The current user service for audit identity tracking.</param>
     public AroobaDbContext(
         DbContextOptions<AroobaDbContext> options,
-        IDateTimeService dateTime,
-        ICurrentUserService currentUser)
+        Domain.Interfaces.IDateTimeService dateTime,
+        Domain.Interfaces.ICurrentUserService currentUser)
         : base(options)
     {
         _dateTime = dateTime;
@@ -107,7 +108,7 @@ public class AroobaDbContext : DbContext, IApplicationDbContext
     /// <returns>The number of state entries written to the database.</returns>
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        var utcNow = _dateTime.UtcNow;
+        var utcNow = _dateTime.Now;
         var userId = _currentUser.UserId;
 
         foreach (var entry in ChangeTracker.Entries<BaseEntity>())
