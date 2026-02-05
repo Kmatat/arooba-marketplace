@@ -1,0 +1,140 @@
+/**
+ * ============================================================
+ * AROOBA MARKETPLACE — Main Application Entry
+ * ============================================================
+ * 
+ * Routes between all business modules based on sidebar selection.
+ * In production, this would use React Router for proper URL routing.
+ * For the MVP dashboard, we use Zustand state to switch views.
+ * ============================================================
+ */
+
+import React from 'react';
+import { DashboardLayout } from './layouts/DashboardLayout';
+import { useAppStore } from './store/app-store';
+
+// Module imports (lazy-loaded in production)
+import { AdminDashboard } from './app/admin/components/AdminDashboard';
+import { VendorManagement } from './app/vendors/components/VendorManagement';
+import { ProductCatalog } from './app/products/components/ProductCatalog';
+import { OrderManagement } from './app/orders/components/OrderManagement';
+import { FinanceWaterfall } from './app/finance/components/FinanceWaterfall';
+import { VendorWalletsTable } from './app/finance/components/VendorWalletsTable';
+import { MonitoringChecklist } from './app/admin/components/MonitoringChecklist';
+import { SectionHeader } from './app/shared/components';
+
+/**
+ * Module Router — maps section IDs to their components.
+ * Each section corresponds to a business module from the spec.
+ */
+function ModuleRouter() {
+  const { activeSection } = useAppStore();
+
+  switch (activeSection) {
+    case 'dashboard':
+      return <AdminDashboard />;
+    case 'vendors':
+      return <VendorManagement />;
+    case 'products':
+      return <ProductCatalog />;
+    case 'orders':
+      return <OrderManagement />;
+    case 'finance':
+      return (
+        <div className="space-y-6">
+          <FinanceWaterfall />
+          <VendorWalletsTable />
+        </div>
+      );
+    case 'pricing':
+      return <FinanceWaterfall />;
+    case 'customers':
+      return <CustomersPlaceholder />;
+    case 'logistics':
+      return <LogisticsPlaceholder />;
+    case 'monitoring':
+      return <MonitoringChecklist />;
+    case 'settings':
+      return <SettingsPlaceholder />;
+    default:
+      return <AdminDashboard />;
+  }
+}
+
+// ──────────────────────────────────────────────
+// PLACEHOLDER MODULES (to be built out)
+// ──────────────────────────────────────────────
+
+function CustomersPlaceholder() {
+  return (
+    <div className="space-y-6">
+      <SectionHeader title="👥 إدارة العملاء" subtitle="قريباً — نظام الولاء والاشتراكات" />
+      <div className="card p-8 text-center">
+        <span className="text-5xl mb-4 block">🚧</span>
+        <p className="text-lg font-bold text-earth-700 mb-2">قيد التطوير</p>
+        <p className="text-sm text-earth-500 max-w-md mx-auto">
+          هذا القسم سيتضمن إدارة العملاء، نظام الولاء (نقطة لكل جنيه)،
+          برنامج الإحالة (أعطي 50 / خد 50)، وإدارة الاشتراكات الأسبوعية.
+        </p>
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg mx-auto">
+          <div className="p-4 rounded-xl bg-arooba-50 border border-arooba-100">
+            <p className="text-2xl mb-1">💎</p>
+            <p className="text-xs font-medium text-arooba-700">نقاط الولاء</p>
+            <p className="text-[10px] text-earth-500">1 نقطة = 1 جنيه</p>
+          </div>
+          <div className="p-4 rounded-xl bg-nile-50 border border-nile-100">
+            <p className="text-2xl mb-1">🎁</p>
+            <p className="text-xs font-medium text-nile-700">الإحالات</p>
+            <p className="text-[10px] text-earth-500">أعطي 50 / خد 50</p>
+          </div>
+          <div className="p-4 rounded-xl bg-blue-50 border border-blue-100">
+            <p className="text-2xl mb-1">📦</p>
+            <p className="text-xs font-medium text-blue-700">صندوق الأسبوع</p>
+            <p className="text-[10px] text-earth-500">اشتراك أسبوعي</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LogisticsPlaceholder() {
+  return (
+    <div className="space-y-6">
+      <SectionHeader title="🚚 إدارة اللوجستيات" subtitle="مناطق الشحن وتتبع الشحنات" />
+      <div className="card p-8 text-center">
+        <span className="text-5xl mb-4 block">🚧</span>
+        <p className="text-lg font-bold text-earth-700 mb-2">قيد التطوير</p>
+        <p className="text-sm text-earth-500 max-w-md mx-auto">
+          هذا القسم سيتضمن إدارة مناطق الشحن، جدول الأسعار،
+          متابعة شركات التوصيل، ومطابقة فواتير الشحن.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function SettingsPlaceholder() {
+  return (
+    <div className="space-y-6">
+      <SectionHeader title="⚙️ الإعدادات" subtitle="إعدادات المنصة والتكوين" />
+      <div className="card p-8 text-center">
+        <span className="text-5xl mb-4 block">⚙️</span>
+        <p className="text-lg font-bold text-earth-700 mb-2">إعدادات النظام</p>
+        <p className="text-sm text-earth-500">إعدادات ض.ق.م، مناطق الشحن، وسياسات الإرجاع</p>
+      </div>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────
+// APP ROOT
+// ──────────────────────────────────────────────
+
+export default function App() {
+  return (
+    <DashboardLayout>
+      <ModuleRouter />
+    </DashboardLayout>
+  );
+}
