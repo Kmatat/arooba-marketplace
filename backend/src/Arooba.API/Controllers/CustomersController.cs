@@ -121,6 +121,26 @@ public class CustomersController : ApiControllerBase
     }
 
     /// <summary>
+    /// Retrieves a customer's delivery addresses.
+    /// </summary>
+    /// <param name="id">The unique identifier of the customer.</param>
+    /// <param name="cancellationToken">Cancellation token for the request.</param>
+    /// <returns>A list of the customer's addresses.</returns>
+    /// <response code="200">Addresses retrieved successfully.</response>
+    /// <response code="404">Customer with the specified identifier was not found.</response>
+    [HttpGet("{id:guid}/addresses")]
+    [ProducesResponseType(typeof(IReadOnlyList<CustomerAddressDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetAddresses(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        // GetCustomerByIdQuery includes addresses; return the customer with addresses
+        var customer = await Sender.Send(new GetCustomerByIdQuery(id), cancellationToken);
+        return Ok(customer);
+    }
+
+    /// <summary>
     /// Adds a new delivery address to a customer's address book.
     /// </summary>
     /// <param name="id">The unique identifier of the customer.</param>

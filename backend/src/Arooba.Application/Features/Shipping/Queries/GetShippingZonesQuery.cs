@@ -1,6 +1,4 @@
 using Arooba.Application.Common.Interfaces;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,8 +14,8 @@ public record GetShippingZonesQuery : IRequest<List<ShippingZoneDto>>;
 /// </summary>
 public record ShippingZoneDto
 {
-    /// <summary>Gets the zone identifier.</summary>
-    public Guid Id { get; init; }
+    /// <summary>Gets the zone identifier (e.g., "cairo", "alexandria").</summary>
+    public string Id { get; init; } = string.Empty;
 
     /// <summary>Gets the zone name in English.</summary>
     public string Name { get; init; } = default!;
@@ -25,14 +23,8 @@ public record ShippingZoneDto
     /// <summary>Gets the zone name in Arabic.</summary>
     public string NameAr { get; init; } = default!;
 
-    /// <summary>Gets the zone code.</summary>
-    public string Code { get; init; } = default!;
-
-    /// <summary>Gets the governorate this zone belongs to.</summary>
-    public string Governorate { get; init; } = default!;
-
-    /// <summary>Gets whether this zone is currently served by the logistics network.</summary>
-    public bool IsActive { get; init; }
+    /// <summary>Gets the cities covered by this zone.</summary>
+    public List<string> CitiesCovered { get; init; } = [];
 
     /// <summary>Gets the estimated delivery days to this zone from Cairo.</summary>
     public int EstimatedDeliveryDays { get; init; }
@@ -66,16 +58,13 @@ public class GetShippingZonesQueryHandler : IRequestHandler<GetShippingZonesQuer
     {
         return await _context.ShippingZones
             .AsNoTracking()
-            .OrderBy(z => z.Governorate)
-            .ThenBy(z => z.Name)
+            .OrderBy(z => z.Name)
             .Select(z => new ShippingZoneDto
             {
                 Id = z.Id,
                 Name = z.Name,
                 NameAr = z.NameAr,
-                Code = z.Code,
-                Governorate = z.Governorate,
-                IsActive = z.IsActive,
+                CitiesCovered = z.CitiesCovered,
                 EstimatedDeliveryDays = z.EstimatedDeliveryDays
             })
             .ToListAsync(cancellationToken);

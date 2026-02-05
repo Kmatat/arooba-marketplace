@@ -1,5 +1,5 @@
-using Arooba.Application.Features.Shipping.Commands.CalculateShippingFee;
-using Arooba.Application.Features.Shipping.Queries.GetShippingZones;
+using Arooba.Application.Features.Shipping.Queries;
+using Arooba.Application.Features.Shipping.Queries.GetRateCards;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -33,6 +33,21 @@ public class ShippingController : ApiControllerBase
     }
 
     /// <summary>
+    /// Retrieves all active shipping rate cards between zones.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token for the request.</param>
+    /// <returns>A list of active rate cards with zone-to-zone pricing.</returns>
+    /// <response code="200">Rate cards retrieved successfully.</response>
+    [HttpGet("rates")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(IReadOnlyList<RateCardDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetRateCards(CancellationToken cancellationToken)
+    {
+        var result = await Sender.Send(new GetRateCardsQuery(), cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
     /// Calculates the delivery fee for shipping a product between two zones.
     /// </summary>
     /// <remarks>
@@ -41,7 +56,7 @@ public class ShippingController : ApiControllerBase
     /// Where chargeable weight = max(actual weight, volumetric weight).
     /// Volumetric weight = (Length * Width * Height) / 5000.
     /// </remarks>
-    /// <param name="command">
+    /// <param name="query">
     /// The shipping fee calculation parameters including origin zone, destination zone,
     /// actual weight (kg), and optional dimensions (cm) for volumetric weight calculation.
     /// </param>
@@ -50,13 +65,13 @@ public class ShippingController : ApiControllerBase
     /// <response code="200">Shipping fee calculated successfully.</response>
     /// <response code="400">Invalid zone identifiers or missing required parameters.</response>
     [HttpPost("calculate-fee")]
-    [ProducesResponseType(typeof(ShippingFeeDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ShippingFeeResultDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CalculateShippingFee(
-        [FromBody] CalculateShippingFeeCommand command,
+        [FromBody] CalculateShippingFeeQuery query,
         CancellationToken cancellationToken)
     {
-        var result = await Sender.Send(command, cancellationToken);
+        var result = await Sender.Send(query, cancellationToken);
         return Ok(result);
     }
 }

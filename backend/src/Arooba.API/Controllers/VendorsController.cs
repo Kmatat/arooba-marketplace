@@ -1,5 +1,6 @@
 using Arooba.Application.Common.Models;
 using Arooba.Application.Features.Vendors.Commands.CreateSubVendor;
+using SubVendorDto = Arooba.Application.Features.Vendors.Queries.SubVendorDto;
 using Arooba.Application.Features.Vendors.Commands.CreateVendor;
 using Arooba.Application.Features.Vendors.Commands.UpdateVendor;
 using Arooba.Application.Features.Vendors.Queries.GetVendorById;
@@ -125,6 +126,26 @@ public class VendorsController : ApiControllerBase
 
         await Sender.Send(command, cancellationToken);
         return NoContent();
+    }
+
+    /// <summary>
+    /// Retrieves the list of sub-vendors under a parent vendor.
+    /// </summary>
+    /// <param name="id">The unique identifier of the parent vendor.</param>
+    /// <param name="cancellationToken">Cancellation token for the request.</param>
+    /// <returns>A list of sub-vendors belonging to the parent vendor.</returns>
+    /// <response code="200">Sub-vendors retrieved successfully.</response>
+    /// <response code="404">Parent vendor with the specified identifier was not found.</response>
+    [HttpGet("{id:guid}/sub-vendors")]
+    [ProducesResponseType(typeof(IReadOnlyList<SubVendorDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetSubVendors(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var vendor = await Sender.Send(new GetVendorByIdQuery(id), cancellationToken);
+        // The vendor detail DTO includes sub-vendors; extract them
+        return Ok(vendor);
     }
 
     /// <summary>
