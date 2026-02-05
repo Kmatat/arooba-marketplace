@@ -1,0 +1,61 @@
+# ============================================================
+# Arooba Marketplace - Docker Ignore
+# ============================================================
+# Excludes files not needed in the Docker build context,
+# reducing build time and image size.
+# ============================================================
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE / Editor
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build outputs
+**/bin/
+**/obj/
+**/out/
+
+# NuGet
+**/packages/
+
+# Test results
+**/TestResults/
+**/test-results/
+**/coverage/
+
+# Documentation (not needed at runtime)
+docs/
+*.md
+LICENSE
+
+# Docker files (prevent recursive copy)
+docker-compose*.yml
+.dockerignore
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files (may contain secrets)
+.env
+.env.*
+*.env
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*~
