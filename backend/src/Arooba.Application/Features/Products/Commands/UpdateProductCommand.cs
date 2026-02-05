@@ -147,18 +147,18 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
                 ParentUpliftValue: parentUpliftValue,
                 CustomUpliftOverride: customUpliftOverride);
 
-            var pricingResult = await _pricingService.CalculatePriceAsync(pricingInput, cancellationToken);
+            var pricingResult = _pricingService.CalculatePrice(pricingInput);
 
             product.FinalPrice = pricingResult.FinalPrice;
             product.CommissionRate = pricingResult.CommissionRate;
-            product.CommissionAmount = pricingResult.CommissionAmount;
-            product.VatAmount = pricingResult.VatAmount;
+            product.CommissionAmount = pricingResult.MarketplaceUplift;
+            product.VatAmount = pricingResult.TotalVatAmount;
             product.ParentUpliftAmount = pricingResult.ParentUpliftAmount;
-            product.WithholdingTaxAmount = pricingResult.WithholdingTaxAmount;
+            product.WithholdingTaxAmount = pricingResult.CooperativeFee;
             product.VendorNetPayout = pricingResult.VendorNetPayout;
         }
 
-        product.UpdatedAt = _dateTime.Now;
+        product.UpdatedAt = _dateTime.UtcNow;
 
         await _context.SaveChangesAsync(cancellationToken);
 

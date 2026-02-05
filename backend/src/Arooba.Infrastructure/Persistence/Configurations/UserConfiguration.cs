@@ -18,11 +18,12 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.HasKey(u => u.Id);
 
-        builder.Property(u => u.MobileNumber)
+        builder.Property(u => u.PhoneNumber)
             .IsRequired()
-            .HasMaxLength(20);
+            .HasMaxLength(20)
+            .HasColumnName("MobileNumber");
 
-        builder.HasIndex(u => u.MobileNumber)
+        builder.HasIndex(u => u.PhoneNumber)
             .IsUnique();
 
         builder.Property(u => u.Email)
@@ -59,5 +60,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(100);
 
         builder.Ignore(u => u.DomainEvents);
+        builder.Ignore(u => u.MobileNumber);
     }
 }

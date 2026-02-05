@@ -81,7 +81,7 @@ public class UpdateProductStatusCommandHandler : IRequestHandler<UpdateProductSt
 
         product.Status = request.NewStatus;
         product.StatusReason = request.Reason;
-        product.UpdatedAt = _dateTime.Now;
+        product.UpdatedAt = _dateTime.UtcNow;
 
         await _context.SaveChangesAsync(cancellationToken);
 

@@ -21,4 +21,10 @@ public class ParentVendor : AuditableEntity
     public decimal? SubVendorUpliftValue { get; set; }
     public Guid UserId { get; set; }
     public List<SubVendor>? SubVendors { get; set; }
+
+    /// <summary>Navigation property to products listed by this vendor.</summary>
+    public List<Product>? Products { get; set; }
+
+    /// <summary>Navigation property to pickup locations for this vendor.</summary>
+    public List<PickupLocation>? PickupLocations { get; set; }
 }

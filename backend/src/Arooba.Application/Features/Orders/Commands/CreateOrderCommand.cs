@@ -85,7 +85,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Gui
     /// <exception cref="BadRequestException">Thrown when stock is insufficient or product is unavailable.</exception>
     public async Task<Guid> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
-        var now = _dateTime.Now;
+        var now = _dateTime.UtcNow;
 
         // Step 1: Validate customer
         var customer = await _context.Customers

@@ -59,7 +59,7 @@ public class UpdateOrderStatusCommandHandler : IRequestHandler<UpdateOrderStatus
     /// <exception cref="BadRequestException">Thrown when the status transition is not allowed.</exception>
     public async Task<bool> Handle(UpdateOrderStatusCommand request, CancellationToken cancellationToken)
     {
-        var now = _dateTime.Now;
+        var now = _dateTime.UtcNow;
 
         var order = await _context.Orders
             .Include(o => o.OrderItems)

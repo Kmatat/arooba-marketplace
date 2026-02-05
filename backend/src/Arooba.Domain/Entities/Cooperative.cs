@@ -6,4 +6,7 @@ namespace Arooba.Domain.Entities;
 public class Cooperative : AuditableEntity
 {
     public string Name { get; set; } = string.Empty;
+    public string NameAr { get; set; } = string.Empty;
+    public string TaxId { get; set; } = string.Empty;
+    public decimal FeePercentage { get; set; }
 }
