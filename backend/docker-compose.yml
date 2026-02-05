@@ -1,0 +1,93 @@
+version: '3.8'
+
+# ============================================================
+# Arooba Marketplace - Docker Compose
+# ============================================================
+# Orchestrates the backend API and SQL Server database.
+#
+# Usage:
+#   docker compose up --build         # Build and start
+#   docker compose up -d --build      # Detached mode
+#   docker compose logs -f arooba-api # Follow API logs
+#   docker compose down               # Stop services
+#   docker compose down -v            # Stop and reset data
+# ============================================================
+
+services:
+  # ──────────────────────────────────────────────
+  # ASP.NET Core 8 Web API
+  # ──────────────────────────────────────────────
+  arooba-api:
+    build:
+      context: .
+      dockerfile: src/Arooba.API/Dockerfile
+    container_name: arooba-api
+    ports:
+      - "5000:8080"
+      - "5001:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - ConnectionStrings__AroobaConnection=Server=sqlserver;Database=AroobaMarketplace;User Id=sa;Password=Arooba@2024!;TrustServerCertificate=True;
+      - JwtSettings__Secret=YourSuperSecretKeyForJwtTokenGeneration2024AroobaMarketplace!
+      - JwtSettings__Issuer=Arooba.API
+      - JwtSettings__Audience=Arooba.Client
+      - JwtSettings__ExpirationMinutes=60
+      - PricingSettings__VatRate=0.14
+      - PricingSettings__MvpFlatRate=0.20
+      - PricingSettings__MinimumFixedUplift=15
+      - PricingSettings__CooperativeFee=0.05
+      - PricingSettings__LogisticsSurcharge=10
+      - EscrowSettings__HoldDays=14
+      - EscrowSettings__MinimumPayoutThreshold=500
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - arooba-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ──────────────────────────────────────────────
+  # Microsoft SQL Server 2022 Express
+  # ──────────────────────────────────────────────
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: arooba-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Arooba@2024!
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "Arooba@2024!" -Q "SELECT 1" -C -b
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - arooba-network
+
+# ──────────────────────────────────────────────
+# Persistent Volumes
+# ──────────────────────────────────────────────
+volumes:
+  sqlserver-data:
+    driver: local
+
+# ──────────────────────────────────────────────
+# Network
+# ──────────────────────────────────────────────
+networks:
+  arooba-network:
+    driver: bridge
