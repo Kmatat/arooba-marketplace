@@ -7,7 +7,7 @@ namespace Arooba.Infrastructure.Persistence.Configurations;
 
 /// <summary>
 /// EF Core configuration for the <see cref="Shipment"/> entity.
-/// Maps to the "Shipments" table with FK to Order.
+/// Maps to the "Shipments" table with FK to Order and PickupLocation.
 /// </summary>
 public class ShipmentConfiguration : IEntityTypeConfiguration<Shipment>
 {
@@ -23,6 +23,11 @@ public class ShipmentConfiguration : IEntityTypeConfiguration<Shipment>
             .HasForeignKey(s => s.OrderId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasOne(s => s.PickupLocation)
+            .WithMany()
+            .HasForeignKey(s => s.PickupLocationId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.Property(s => s.TrackingNumber)
             .HasMaxLength(100);
 
@@ -35,10 +40,15 @@ public class ShipmentConfiguration : IEntityTypeConfiguration<Shipment>
         builder.Property(s => s.CodAmountDue)
             .HasPrecision(18, 2);
 
+        builder.Property(s => s.TotalWeight)
+            .HasPrecision(18, 4);
+
         builder.Property(s => s.Status)
             .IsRequired()
             .HasConversion<string>()
             .HasMaxLength(30);
+
+        builder.HasIndex(s => s.PickupLocationId);
 
         builder.Ignore(s => s.DomainEvents);
     }

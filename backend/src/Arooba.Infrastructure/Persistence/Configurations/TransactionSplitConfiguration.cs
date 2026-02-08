@@ -6,7 +6,7 @@ namespace Arooba.Infrastructure.Persistence.Configurations;
 
 /// <summary>
 /// EF Core configuration for the <see cref="TransactionSplit"/> entity.
-/// Maps to the "TransactionSplits" table with FK to OrderItem.
+/// Maps to the "TransactionSplits" table with FK to OrderItem and Order.
 /// All bucket fields use decimal(18,2) precision.
 /// </summary>
 public class TransactionSplitConfiguration : IEntityTypeConfiguration<TransactionSplit>
@@ -18,18 +18,34 @@ public class TransactionSplitConfiguration : IEntityTypeConfiguration<Transactio
 
         builder.HasKey(t => t.Id);
 
+        builder.HasOne(t => t.Order)
+            .WithMany()
+            .HasForeignKey(t => t.OrderId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.HasOne(t => t.OrderItem)
             .WithMany()
             .HasForeignKey(t => t.OrderItemId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Property(t => t.BucketA).HasPrecision(18, 2);
-        builder.Property(t => t.BucketB).HasPrecision(18, 2);
-        builder.Property(t => t.BucketC).HasPrecision(18, 2);
-        builder.Property(t => t.BucketD).HasPrecision(18, 2);
-        builder.Property(t => t.BucketE).HasPrecision(18, 2);
+        // Financial tracking
+        builder.Property(t => t.GrossAmount).HasPrecision(18, 2);
+        builder.Property(t => t.VendorPayoutBucket).HasPrecision(18, 2);
+        builder.Property(t => t.AroobaBucket).HasPrecision(18, 2);
+        builder.Property(t => t.VatBucket).HasPrecision(18, 2);
+        builder.Property(t => t.ParentUpliftBucket).HasPrecision(18, 2);
+        builder.Property(t => t.WithholdingTaxBucket).HasPrecision(18, 2);
         builder.Property(t => t.TotalAmount).HasPrecision(18, 2);
 
+        builder.HasIndex(t => t.OrderId);
+        builder.HasIndex(t => t.ParentVendorId);
+
+        // Ignore computed/alias properties
+        builder.Ignore(t => t.BucketA);
+        builder.Ignore(t => t.BucketB);
+        builder.Ignore(t => t.BucketC);
+        builder.Ignore(t => t.BucketD);
+        builder.Ignore(t => t.BucketE);
         builder.Ignore(t => t.DomainEvents);
     }
 }

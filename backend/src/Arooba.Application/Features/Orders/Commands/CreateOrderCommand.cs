@@ -43,8 +43,8 @@ public record CreateOrderCommand : IRequest<Guid>
     /// <summary>Gets the delivery city.</summary>
     public string DeliveryCity { get; init; } = default!;
 
-    /// <summary>Gets the delivery shipping zone identifier.</summary>
-    public Guid DeliveryZoneId { get; init; }
+    /// <summary>Gets the delivery shipping zone identifier (e.g., "cairo", "alexandria").</summary>
+    public string DeliveryZoneId { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -96,7 +96,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Gui
             throw new NotFoundException(nameof(Customer), request.CustomerId);
         }
 
-        // Step 2: Validate delivery zone
+        // Step 2: Validate delivery zone (string-based ID like "cairo")
         var deliveryZone = await _context.ShippingZones
             .FirstOrDefaultAsync(z => z.Id == request.DeliveryZoneId, cancellationToken);
 
@@ -104,6 +104,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Gui
         {
             throw new NotFoundException(nameof(ShippingZone), request.DeliveryZoneId);
         }
+        var zoneId = deliveryZone.Id; // string-based zone ID
 
         // Step 3: Load and validate all requested products
         var productIds = request.Items.Select(i => i.ProductId).ToList();
@@ -143,7 +144,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Gui
                 var pickupLocation = await _context.PickupLocations
                     .FirstOrDefaultAsync(pl => pl.Id == product.PickupLocationId, cancellationToken);
 
-                if (pickupLocation is not null && pickupLocation.ShippingZoneId != request.DeliveryZoneId)
+                if (pickupLocation is not null && pickupLocation.ZoneId != request.DeliveryZoneId)
                 {
                     throw new BadRequestException(
                         $"Product '{product.Title}' is only available for local delivery within its zone.");
@@ -164,9 +165,9 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Gui
             PaymentMethod = request.PaymentMethod,
             DeliveryAddress = request.DeliveryAddress,
             DeliveryCity = request.DeliveryCity,
-            DeliveryZoneId = request.DeliveryZoneId,
-            SubTotal = 0m,
-            TotalShippingFee = 0m,
+            DeliveryZoneId = zoneId,
+            Subtotal = 0m,
+            TotalDeliveryFee = 0m,
             TotalAmount = 0m,
             CreatedAt = now
         };
@@ -195,6 +196,8 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Gui
                 ProductId = product.Id,
                 ProductTitle = product.Title,
                 ProductSku = product.Sku,
+                ProductImage = product.Images?.FirstOrDefault(),
+                VendorName = product.ParentVendor?.BusinessName ?? string.Empty,
                 Quantity = itemRequest.Quantity,
                 UnitPrice = product.FinalPrice,
                 TotalPrice = itemTotalPrice,
@@ -239,7 +242,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Gui
             }
         }
 
-        order.SubTotal = orderSubTotal;
+        order.Subtotal = orderSubTotal;
         order.TotalAmount = orderSubTotal; // Shipping fee added separately
 
         // Step 6: Group order items into shipments by pickup location
@@ -258,8 +261,8 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Gui
             {
                 Id = shipmentId,
                 OrderId = orderId,
-                PickupLocationId = group.Key,
-                Status = OrderStatus.Pending,
+                PickupLocationId = group.Key ?? Guid.Empty,
+                Status = ShipmentStatus.Pending,
                 TrackingNumber = GenerateTrackingNumber(now, shipments.Count + 1),
                 TotalWeight = shipmentItems.Sum(oi =>
                 {

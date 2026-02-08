@@ -1,3 +1,4 @@
+using Arooba.Domain.Enums;
 using FluentValidation;
 
 namespace Arooba.Application.Features.Products.Commands;
@@ -10,32 +11,49 @@ public class CreateProductCommandValidator : AbstractValidator<CreateProductComm
 {
     public CreateProductCommandValidator()
     {
-        RuleFor(p => p.Name)
-            .NotEmpty().WithMessage("Product name is required.")
-            .MaximumLength(200).WithMessage("Product name must not exceed 200 characters.");
+        RuleFor(p => p.ParentVendorId)
+            .NotEmpty().WithMessage("Parent vendor ID is required.");
+
+        RuleFor(p => p.Title)
+            .NotEmpty().WithMessage("Product title is required.")
+            .MaximumLength(500).WithMessage("Product title must not exceed 500 characters.");
+
+        RuleFor(p => p.TitleAr)
+            .MaximumLength(500).WithMessage("Arabic title must not exceed 500 characters.");
 
         RuleFor(p => p.Description)
-            .MaximumLength(2000).WithMessage("Description must not exceed 2000 characters.");
+            .MaximumLength(4000).WithMessage("Description must not exceed 4000 characters.");
 
-        RuleFor(p => p.VendorBasePrice)
-            .GreaterThan(0).WithMessage("Vendor base price must be greater than zero.");
+        RuleFor(p => p.DescriptionAr)
+            .MaximumLength(4000).WithMessage("Arabic description must not exceed 4000 characters.");
 
         RuleFor(p => p.CategoryId)
             .NotEmpty().WithMessage("Category is required.");
 
+        RuleFor(p => p.SellingPrice)
+            .GreaterThan(0).WithMessage("Selling price must be greater than zero.");
+
+        RuleFor(p => p.CostPrice)
+            .GreaterThanOrEqualTo(0).WithMessage("Cost price cannot be negative.");
+
         RuleFor(p => p.WeightKg)
             .GreaterThan(0).WithMessage("Weight must be greater than zero.");
 
-        RuleFor(p => p.LengthCm)
+        RuleFor(p => p.DimensionL)
             .GreaterThan(0).WithMessage("Length must be greater than zero.");
 
-        RuleFor(p => p.WidthCm)
+        RuleFor(p => p.DimensionW)
             .GreaterThan(0).WithMessage("Width must be greater than zero.");
 
-        RuleFor(p => p.HeightCm)
+        RuleFor(p => p.DimensionH)
             .GreaterThan(0).WithMessage("Height must be greater than zero.");
 
-        RuleFor(p => p.StockQuantity)
-            .GreaterThanOrEqualTo(0).WithMessage("Stock quantity cannot be negative.");
+        RuleFor(p => p.QuantityAvailable)
+            .GreaterThanOrEqualTo(0).WithMessage("Quantity cannot be negative.")
+            .When(p => p.StockMode == StockMode.ReadyStock);
+
+        RuleFor(p => p.LeadTimeDays)
+            .GreaterThan(0).WithMessage("Lead time must be greater than zero.")
+            .When(p => p.StockMode == StockMode.MadeToOrder);
     }
 }

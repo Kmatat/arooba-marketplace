@@ -135,7 +135,7 @@ public class GetLedgerEntriesQueryHandler : IRequestHandler<GetLedgerEntriesQuer
                 VendorAmount = le.VendorAmount,
                 CommissionAmount = le.CommissionAmount,
                 VatAmount = le.VatAmount,
-                Description = le.Description,
+                Description = le.Description ?? string.Empty,
                 BalanceStatus = le.BalanceStatus,
                 CreatedAt = le.CreatedAt
             });

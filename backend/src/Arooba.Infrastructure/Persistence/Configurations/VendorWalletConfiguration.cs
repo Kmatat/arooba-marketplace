@@ -27,5 +27,12 @@ public class VendorWalletConfiguration : IEntityTypeConfiguration<VendorWallet>
         builder.Property(w => w.PendingBalance).HasPrecision(18, 2);
         builder.Property(w => w.AvailableBalance).HasPrecision(18, 2);
         builder.Property(w => w.LifetimeEarnings).HasPrecision(18, 2);
+        builder.Property(w => w.TotalPayouts).HasPrecision(18, 2);
+
+        // Ignore computed/alias properties
+        builder.Ignore(w => w.ParentVendorId);
+        builder.Ignore(w => w.TotalEarnings);
+        builder.Ignore(w => w.Id);
+        builder.Ignore(w => w.DomainEvents);
     }
 }
