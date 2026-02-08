@@ -20,6 +20,7 @@ const NAV_SECTIONS = [
     labelEn: 'Main',
     items: [
       { id: 'dashboard', labelAr: 'لوحة التحكم', labelEn: 'Dashboard', icon: '📊' },
+      { id: 'user-analytics', labelAr: 'تحليلات المستخدمين', labelEn: 'User Analytics', icon: '📈' },
     ],
   },
   {

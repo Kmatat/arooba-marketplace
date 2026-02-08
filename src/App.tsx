@@ -24,6 +24,7 @@ import { MonitoringChecklist } from './app/admin/components/MonitoringChecklist'
 import { PlatformConfigManager } from './app/admin/components/PlatformConfigManager';
 import { VendorApprovalQueue } from './app/admin/components/VendorApprovalQueue';
 import { AuditTrail } from './app/admin/components/AuditTrail';
+import { UserAnalyticsDashboard } from './app/analytics/components/UserAnalyticsDashboard';
 import { SectionHeader } from './app/shared/components';
 
 /**
@@ -36,6 +37,8 @@ function ModuleRouter() {
   switch (activeSection) {
     case 'dashboard':
       return <AdminDashboard />;
+    case 'user-analytics':
+      return <UserAnalyticsDashboard />;
     case 'vendors':
       return <VendorManagement />;
     case 'products':

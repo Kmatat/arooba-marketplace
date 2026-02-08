@@ -63,6 +63,9 @@ public interface IApplicationDbContext
     /// <summary>Gets the ProductCategories table.</summary>
     DbSet<ProductCategory> ProductCategories { get; }
 
+    /// <summary>Gets the UserActivities table for analytics tracking.</summary>
+    DbSet<UserActivity> UserActivities { get; }
+
     /// <summary>
     /// Saves all pending changes to the underlying database.
     /// </summary>

@@ -63,6 +63,9 @@ public interface IAroobaDbContext
     /// <summary>Gets the product categories table.</summary>
     DbSet<ProductCategory> ProductCategories { get; }
 
+    /// <summary>Gets the user activities table for analytics tracking.</summary>
+    DbSet<UserActivity> UserActivities { get; }
+
     /// <summary>
     /// Saves all changes made in this context to the database.
     /// </summary>
