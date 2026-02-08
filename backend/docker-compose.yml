@@ -5,6 +5,9 @@ version: '3.8'
 # ============================================================
 # Orchestrates the backend API and SQL Server database.
 #
+# Prerequisites:
+#   Copy .env.example to .env and fill in the values before starting.
+#
 # Usage:
 #   docker compose up --build         # Build and start
 #   docker compose up -d --build      # Detached mode
@@ -26,21 +29,21 @@ services:
       - "5000:8080"
       - "5001:8081"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
-      - ConnectionStrings__AroobaConnection=Server=sqlserver;Database=AroobaMarketplace;User Id=sa;Password=Arooba@2024!;TrustServerCertificate=True;
-      - JwtSettings__Secret=YourSuperSecretKeyForJwtTokenGeneration2024AroobaMarketplace!
-      - JwtSettings__Issuer=Arooba.API
-      - JwtSettings__Audience=Arooba.Client
-      - JwtSettings__ExpirationMinutes=60
-      - PricingSettings__VatRate=0.14
-      - PricingSettings__MvpFlatRate=0.20
-      - PricingSettings__MinimumFixedUplift=15
-      - PricingSettings__CooperativeFee=0.05
-      - PricingSettings__LogisticsSurcharge=10
-      - EscrowSettings__HoldDays=14
-      - EscrowSettings__MinimumPayoutThreshold=500
+      - ConnectionStrings__AroobaConnection=Server=sqlserver;Database=${DB_NAME};User Id=${DB_USER};Password=${DB_PASSWORD};TrustServerCertificate=${DB_TRUST_SERVER_CERTIFICATE:-True};
+      - JwtSettings__Secret=${JWT_SECRET}
+      - JwtSettings__Issuer=${JWT_ISSUER:-Arooba.API}
+      - JwtSettings__Audience=${JWT_AUDIENCE:-Arooba.Client}
+      - JwtSettings__ExpirationMinutes=${JWT_EXPIRATION_MINUTES:-60}
+      - PricingSettings__VatRate=${PRICING_VAT_RATE:-0.14}
+      - PricingSettings__MvpFlatRate=${PRICING_MVP_FLAT_RATE:-0.20}
+      - PricingSettings__MinimumFixedUplift=${PRICING_MINIMUM_FIXED_UPLIFT:-15}
+      - PricingSettings__CooperativeFee=${PRICING_COOPERATIVE_FEE:-0.05}
+      - PricingSettings__LogisticsSurcharge=${PRICING_LOGISTICS_SURCHARGE:-10}
+      - EscrowSettings__HoldDays=${ESCROW_HOLD_DAYS:-14}
+      - EscrowSettings__MinimumPayoutThreshold=${ESCROW_MINIMUM_PAYOUT_THRESHOLD:-500}
     depends_on:
       sqlserver:
         condition: service_healthy
@@ -62,14 +65,14 @@ services:
     container_name: arooba-sqlserver
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=Arooba@2024!
+      - SA_PASSWORD=${DB_PASSWORD}
       - MSSQL_PID=Express
     ports:
       - "1433:1433"
     volumes:
       - sqlserver-data:/var/opt/mssql
     healthcheck:
-      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "Arooba@2024!" -Q "SELECT 1" -C -b
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$${DB_PASSWORD}" -Q "SELECT 1" -C -b
       interval: 10s
       timeout: 5s
       retries: 5

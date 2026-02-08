@@ -24,8 +24,8 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 // API layer: controllers with global exception filter, problem details
 builder.Services.AddApiServices();
 
-// Health checks
-builder.Services.AddAroobaHealthChecks();
+// Health checks (includes SQL Server connectivity check)
+builder.Services.AddAroobaHealthChecks(builder.Configuration);
 
 // Swagger / OpenAPI
 builder.Services.AddSwaggerGen(c =>
@@ -93,8 +93,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-        var secret = jwtSettings["Secret"]
-            ?? throw new InvalidOperationException("JwtSettings:Secret is not configured.");
+        var secret = jwtSettings["Secret"];
+        if (string.IsNullOrWhiteSpace(secret))
+            throw new InvalidOperationException(
+                "JwtSettings:Secret is not configured. Set it via environment variable or user secrets.");
 
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -137,8 +139,9 @@ if (app.Environment.IsDevelopment())
     // Auto-migrate and seed the database in development
     using var scope = app.Services.CreateScope();
     var context = scope.ServiceProvider.GetRequiredService<AroobaDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger<AroobaDbContext>();
     await context.Database.MigrateAsync();
-    await AroobaDbContextSeed.SeedAsync(context);
+    await AroobaDbContextSeed.SeedAsync(context, logger);
 }
 
 app.UseHttpsRedirection();
