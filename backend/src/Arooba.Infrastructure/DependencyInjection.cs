@@ -26,6 +26,15 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        // Validate the connection string is provided
+        var connectionString = configuration.GetConnectionString("AroobaConnection");
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            throw new InvalidOperationException(
+                "ConnectionStrings:AroobaConnection is not configured. " +
+                "Set it via environment variable, user secrets, or appsettings.");
+        }
+
         // Register the auditable entity interceptor
         services.AddScoped<AuditableEntityInterceptor>();
 
@@ -35,7 +44,7 @@ public static class DependencyInjection
             var interceptor = serviceProvider.GetRequiredService<AuditableEntityInterceptor>();
 
             options.UseSqlServer(
-                configuration.GetConnectionString("AroobaConnection"),
+                connectionString,
                 sqlOptions =>
                 {
                     sqlOptions.MigrationsAssembly(typeof(AroobaDbContext).Assembly.FullName);

@@ -34,13 +34,28 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Adds a custom health check endpoint for monitoring the API.
+    /// Adds health check endpoints including SQL Server database connectivity
+    /// using the centralized connection string from configuration.
     /// </summary>
     /// <param name="services">The service collection to configure.</param>
+    /// <param name="configuration">The application configuration containing connection strings.</param>
     /// <returns>The same service collection for chaining.</returns>
-    public static IServiceCollection AddAroobaHealthChecks(this IServiceCollection services)
+    public static IServiceCollection AddAroobaHealthChecks(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
-        services.AddHealthChecks();
+        var connectionString = configuration.GetConnectionString("AroobaConnection");
+
+        var builder = services.AddHealthChecks();
+
+        if (!string.IsNullOrWhiteSpace(connectionString))
+        {
+            builder.AddSqlServer(
+                connectionString,
+                name: "sqlserver",
+                tags: ["db", "sql"]);
+        }
+
         return services;
     }
 }
