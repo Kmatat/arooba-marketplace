@@ -97,7 +97,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResultDto>
         // Authenticate via identity service (OTP validation)
         var authResult = await _identityService.CreateUserAsync(user.FullName, request.Otp);
 
-        if (!authResult.Succeeded)
+        if (!authResult.IsSuccess)
         {
             throw new BadRequestException("Invalid or expired OTP. Please request a new one.");
         }

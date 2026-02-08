@@ -11,8 +11,9 @@ namespace Arooba.Application.Features.Auth.Commands;
 /// <summary>
 /// Command to register a new user account on the Arooba Marketplace.
 /// Supports registration for both customers and vendors.
+/// After registration, an OTP is sent to the user's mobile number for verification.
 /// </summary>
-public record RegisterCommand : IRequest<Guid>
+public record RegisterCommand : IRequest<RegisterResultDto>
 {
     /// <summary>Gets the user's full name.</summary>
     public string FullName { get; init; } = default!;
@@ -31,28 +32,40 @@ public record RegisterCommand : IRequest<Guid>
 }
 
 /// <summary>
+/// DTO containing registration result with OTP delivery status.
+/// </summary>
+public record RegisterResultDto
+{
+    /// <summary>The newly created user's ID.</summary>
+    public Guid UserId { get; init; }
+
+    /// <summary>Whether the verification OTP was sent successfully.</summary>
+    public bool OtpSent { get; init; }
+
+    /// <summary>A user-facing message.</summary>
+    public string Message { get; init; } = default!;
+}
+
+/// <summary>
 /// Handles new user registration ensuring mobile number uniqueness
 /// and creating the appropriate user record.
 /// </summary>
-public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Guid>
+public class RegisterCommandHandler : IRequestHandler<RegisterCommand, RegisterResultDto>
 {
     private readonly IApplicationDbContext _context;
     private readonly IIdentityService _identityService;
+    private readonly IOtpService _otpService;
     private readonly IDateTimeService _dateTime;
 
-    /// <summary>
-    /// Initializes a new instance of <see cref="RegisterCommandHandler"/>.
-    /// </summary>
-    /// <param name="context">The application database context.</param>
-    /// <param name="identityService">The identity service for user creation.</param>
-    /// <param name="dateTime">The date/time service.</param>
     public RegisterCommandHandler(
         IApplicationDbContext context,
         IIdentityService identityService,
+        IOtpService otpService,
         IDateTimeService dateTime)
     {
         _context = context;
         _identityService = identityService;
+        _otpService = otpService;
         _dateTime = dateTime;
     }
 
@@ -62,12 +75,9 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Guid>
     /// 2. Creating the user in the identity store
     /// 3. Creating the User entity in the database
     /// 4. Creating associated role-specific records (Customer, etc.)
+    /// 5. Sending an OTP to the user's mobile number for verification
     /// </summary>
-    /// <param name="request">The register command.</param>
-    /// <param name="cancellationToken">Token to cancel the operation.</param>
-    /// <returns>The unique identifier of the newly created user.</returns>
-    /// <exception cref="BadRequestException">Thrown when the mobile number is already registered.</exception>
-    public async Task<Guid> Handle(RegisterCommand request, CancellationToken cancellationToken)
+    public async Task<RegisterResultDto> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
         // Check if mobile number already exists
         var existingUser = await _context.Users
@@ -85,7 +95,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Guid>
             request.FullName,
             request.MobileNumber);
 
-        if (!identityResult.Succeeded)
+        if (!identityResult.IsSuccess)
         {
             throw new BadRequestException("Failed to create user account. Please try again.");
         }
@@ -125,7 +135,17 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Guid>
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return userId;
+        // Send OTP for mobile verification
+        var otpResult = await _otpService.SendOtpAsync(request.MobileNumber);
+
+        return new RegisterResultDto
+        {
+            UserId = userId,
+            OtpSent = otpResult.Success,
+            Message = otpResult.Success
+                ? "Registration successful. Please verify your mobile number with the OTP sent via SMS."
+                : "Registration successful but OTP delivery failed. Please request a new OTP."
+        };
     }
 }
 

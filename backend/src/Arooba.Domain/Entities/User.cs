@@ -20,4 +20,14 @@ public class User : AuditableEntity
     public string? RefreshToken { get; set; }
     public DateTime? RefreshTokenExpiryTime { get; set; }
     public DateTime? LastLoginAt { get; set; }
+
+    // Social login fields
+    public SocialProvider SocialProvider { get; set; } = SocialProvider.None;
+    public string? SocialProviderId { get; set; }
+
+    // OTP fields
+    public string? OtpCode { get; set; }
+    public DateTime? OtpExpiresAt { get; set; }
+    public int OtpAttempts { get; set; }
+    public bool IsMobileVerified { get; set; }
 }
