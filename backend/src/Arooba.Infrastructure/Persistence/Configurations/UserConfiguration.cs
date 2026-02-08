@@ -59,6 +59,28 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.LastModifiedBy)
             .HasMaxLength(100);
 
+        // Social login fields
+        builder.Property(u => u.SocialProvider)
+            .HasConversion<string>()
+            .HasMaxLength(20)
+            .HasDefaultValue(SocialProvider.None);
+
+        builder.Property(u => u.SocialProviderId)
+            .HasMaxLength(256);
+
+        builder.HasIndex(u => new { u.SocialProvider, u.SocialProviderId })
+            .HasFilter("[SocialProviderId] IS NOT NULL");
+
+        // OTP fields
+        builder.Property(u => u.OtpCode)
+            .HasMaxLength(10);
+
+        builder.Property(u => u.OtpAttempts)
+            .HasDefaultValue(0);
+
+        builder.Property(u => u.IsMobileVerified)
+            .HasDefaultValue(false);
+
         builder.Ignore(u => u.DomainEvents);
         builder.Ignore(u => u.MobileNumber);
     }

@@ -70,6 +70,15 @@ public static class DependencyInjection
         services.AddTransient<IIdentityService, IdentityService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
 
+        // Register OTP service (ADVANSYS SMS gateway)
+        services.AddHttpClient("Advansys");
+        services.AddHttpClient("Apple");
+        services.AddHttpClient("Facebook");
+        services.AddScoped<IOtpService, AdvansysOtpService>();
+
+        // Register Social Auth service (Google, Apple, Facebook)
+        services.AddScoped<ISocialAuthService, SocialAuthService>();
+
         return services;
     }
 }
