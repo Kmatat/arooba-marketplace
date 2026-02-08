@@ -97,6 +97,9 @@ public class AroobaDbContext : DbContext, IAroobaDbContext, IApplicationDbContex
     /// <inheritdoc />
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
+    /// <inheritdoc />
+    public DbSet<UserActivity> UserActivities => Set<UserActivity>();
+
     /// <summary>
     /// Applies all <see cref="IEntityTypeConfiguration{TEntity}"/> implementations
     /// found in the current assembly to the model builder.
