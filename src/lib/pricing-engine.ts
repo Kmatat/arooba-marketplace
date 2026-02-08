@@ -2,32 +2,72 @@
  * ============================================================
  * AROOBA MARKETPLACE — Pricing Engine
  * ============================================================
- * 
+ *
  * This is the MOST critical piece of business logic.
  * It calculates the final price a customer sees, the vendor payout,
  * and the 5-bucket waterfall split for every transaction.
- * 
+ *
  * BUSINESS CONTEXT (for non-developers):
- * 
+ *
  * Think of it like a layered cake:
- * 
+ *
  * Layer 1: Vendor sets their base price (e.g., 500 EGP for a carpet)
  * Layer 2: If vendor is non-legalized, cooperative adds 5% (25 EGP)
  * Layer 3: Arooba adds marketplace uplift (20% = 100 EGP)
  * Layer 4: VAT is calculated on applicable portions
  * Layer 5: Shipping fee is added separately
- * 
- * The customer sees ONE final price. Behind the scenes, 
+ *
+ * The customer sees ONE final price. Behind the scenes,
  * the system knows exactly who gets what.
- * 
+ *
  * CHALLENGE:
  * The "Minimum Uplift Rule" ensures we don't lose money on cheap items.
  * A 20 EGP soap at 20% uplift = only 4 EGP commission — that doesn't
  * even cover the bank transfer fee. So we enforce a 15 EGP minimum.
+ *
+ * DYNAMIC CONFIGURATION:
+ * All pricing parameters are now sourced from the admin configuration
+ * store. The hardcoded constants serve only as fallback defaults.
+ * Admin can modify uplift rates, VAT, cooperative fees, and thresholds
+ * without code changes.
  * ============================================================
  */
 
-import { TAX, UPLIFT_RULES, UPLIFT_MATRIX, SHIPPING } from '../../config/constants';
+import { TAX, UPLIFT_RULES, UPLIFT_MATRIX, SHIPPING } from '../config/constants';
+
+// ──────────────────────────────────────────────
+// DYNAMIC CONFIG INTERFACE
+// ──────────────────────────────────────────────
+
+/**
+ * Dynamic pricing configuration sourced from admin store.
+ * When provided, these values override the hardcoded constants.
+ * When omitted, the engine falls back to constants.ts defaults.
+ */
+export interface DynamicPricingConfig {
+  vatRate: number;
+  mvpFlatRate: number;
+  minimumFixedUplift: number;
+  lowPriceThreshold: number;
+  lowPriceFixedMarkup: number;
+  cooperativeFee: number;
+  logisticsSurcharge: number;
+  categoryUplifts?: Record<string, { min: number; max: number; default: number; risk: string }>;
+}
+
+/** Returns the default config from hardcoded constants. */
+export function getDefaultPricingConfig(): DynamicPricingConfig {
+  return {
+    vatRate: TAX.vatRate,
+    mvpFlatRate: UPLIFT_RULES.mvpFlatRate,
+    minimumFixedUplift: UPLIFT_RULES.minimumFixedUplift,
+    lowPriceThreshold: UPLIFT_RULES.lowPriceThreshold,
+    lowPriceFixedMarkup: UPLIFT_RULES.lowPriceFixedMarkup,
+    cooperativeFee: UPLIFT_RULES.cooperativeFee,
+    logisticsSurcharge: UPLIFT_RULES.logisticsSurcharge,
+    categoryUplifts: { ...UPLIFT_MATRIX },
+  };
+}
 
 // ──────────────────────────────────────────────
 // TYPE DEFINITIONS
@@ -35,7 +75,7 @@ import { TAX, UPLIFT_RULES, UPLIFT_MATRIX, SHIPPING } from '../../config/constan
 
 export interface PricingInput {
   vendorBasePrice: number;
-  categoryId: keyof typeof UPLIFT_MATRIX;
+  categoryId: string;
   isVendorVatRegistered: boolean;
   isNonLegalizedVendor: boolean;
   parentUpliftType?: 'fixed' | 'percentage';
@@ -53,20 +93,23 @@ export interface PricingResult {
   parentVendorUplift: number;
   marketplaceUplift: number;
   logisticsSurcharge: number;
-  
+
   // VAT
   vendorVat: number;
   aroobaVat: number;
-  
+
   // The 5-Bucket Waterfall
   bucketA_vendorRevenue: number;
   bucketB_vendorVat: number;
   bucketC_aroobaRevenue: number;
   bucketD_aroobaVat: number;
-  
+
   // Margins
   aroobaGrossMargin: number;
   aroobaMarginPercent: number;
+
+  // Config source indicator (for transparency in admin UI)
+  configSource: 'dynamic' | 'default';
 }
 
 export interface ShippingFeeInput {
@@ -98,23 +141,35 @@ export interface ShippingFeeResult {
 /**
  * Calculates the complete price breakdown for a product.
  * This function implements the entire Additive Uplift Model.
- * 
+ *
+ * Accepts an optional dynamic config parameter. When provided,
+ * uses admin-configured values. Falls back to hardcoded constants
+ * for backward compatibility.
+ *
  * @example
- * // Legal vendor selling a silver ring for 300 EGP
+ * // Using default constants
  * const result = calculatePrice({
  *   vendorBasePrice: 300,
  *   categoryId: 'jewelry-accessories',
  *   isVendorVatRegistered: true,
  *   isNonLegalizedVendor: false,
  * });
- * // result.finalPrice → 345 EGP + VAT
+ *
+ * @example
+ * // Using dynamic admin config
+ * const config = adminStore.getState().getDynamicPricingConfig();
+ * const result = calculatePrice(input, config);
  */
-export function calculatePrice(input: PricingInput): PricingResult {
+export function calculatePrice(input: PricingInput, dynamicConfig?: DynamicPricingConfig): PricingResult {
   const { vendorBasePrice, categoryId, isVendorVatRegistered, isNonLegalizedVendor } = input;
+
+  // Resolve config: dynamic admin values or hardcoded fallback
+  const config = dynamicConfig ?? getDefaultPricingConfig();
+  const configSource: PricingResult['configSource'] = dynamicConfig ? 'dynamic' : 'default';
 
   // Step 1: Calculate Cooperative Fee (only for non-legalized vendors)
   const cooperativeFee = isNonLegalizedVendor
-    ? vendorBasePrice * UPLIFT_RULES.cooperativeFee
+    ? vendorBasePrice * config.cooperativeFee
     : 0;
 
   const priceAfterCoop = vendorBasePrice + cooperativeFee;
@@ -128,36 +183,36 @@ export function calculatePrice(input: PricingInput): PricingResult {
   }
 
   // Step 3: Calculate Marketplace Uplift
-  const categoryConfig = UPLIFT_MATRIX[categoryId];
-  const upliftRate = input.customUpliftOverride ?? categoryConfig?.default ?? UPLIFT_RULES.mvpFlatRate;
-  
+  const categoryConfig = config.categoryUplifts?.[categoryId] ??
+    (UPLIFT_MATRIX as Record<string, { min: number; max: number; default: number; risk: string }>)[categoryId];
+  const upliftRate = input.customUpliftOverride ?? categoryConfig?.default ?? config.mvpFlatRate;
+
   let marketplaceUplift = priceAfterCoop * upliftRate;
 
   // Step 3b: Apply Minimum Uplift Rule
-  // If the calculated uplift is less than the minimum, use the minimum
-  if (marketplaceUplift < UPLIFT_RULES.minimumFixedUplift) {
-    marketplaceUplift = UPLIFT_RULES.minimumFixedUplift;
+  if (marketplaceUplift < config.minimumFixedUplift) {
+    marketplaceUplift = config.minimumFixedUplift;
   }
 
   // Step 3c: For items under the low-price threshold, use fixed markup
-  if (vendorBasePrice < UPLIFT_RULES.lowPriceThreshold) {
-    marketplaceUplift = Math.max(marketplaceUplift, UPLIFT_RULES.lowPriceFixedMarkup);
+  if (vendorBasePrice < config.lowPriceThreshold) {
+    marketplaceUplift = Math.max(marketplaceUplift, config.lowPriceFixedMarkup);
   }
 
   // Step 4: Add Logistics Surcharge (SmartCom Buffer)
-  const logisticsSurcharge = UPLIFT_RULES.logisticsSurcharge;
+  const logisticsSurcharge = config.logisticsSurcharge;
 
   // Step 5: Calculate Bucket A — Vendor Revenue
   const bucketA = vendorBasePrice + parentVendorUplift;
 
   // Step 6: Calculate Bucket B — Vendor VAT
-  const bucketB = isVendorVatRegistered ? bucketA * TAX.vatRate : 0;
+  const bucketB = isVendorVatRegistered ? bucketA * config.vatRate : 0;
 
   // Step 7: Calculate Bucket C — Arooba Revenue
   const bucketC = cooperativeFee + marketplaceUplift + logisticsSurcharge;
 
   // Step 8: Calculate Bucket D — Arooba VAT (always applies)
-  const bucketD = bucketC * TAX.vatRate;
+  const bucketD = bucketC * config.vatRate;
 
   // Step 9: Final Price (excluding delivery — that's Bucket E)
   const finalPrice = bucketA + bucketB + bucketC + bucketD;
@@ -181,6 +236,7 @@ export function calculatePrice(input: PricingInput): PricingResult {
     bucketD_aroobaVat: roundPrice(bucketD),
     aroobaGrossMargin: roundPrice(aroobaGrossMargin),
     aroobaMarginPercent: roundPrice(aroobaMarginPercent),
+    configSource,
   };
 }
 
@@ -190,17 +246,18 @@ export function calculatePrice(input: PricingInput): PricingResult {
 
 /**
  * Calculates shipping fee using the Zone + Weight model.
- * 
+ *
  * BUSINESS LOGIC:
- * 1. Calculate volumetric weight: (L × W × H) / 5000
+ * 1. Calculate volumetric weight: (L x W x H) / 5000
  * 2. Chargeable weight = MAX(actual, volumetric)
- * 3. Fee = Base Rate + (excess weight × per-kg rate)
+ * 3. Fee = Base Rate + (excess weight x per-kg rate)
  * 4. Apply SmartCom Buffer to lower customer-facing fee
  */
-export function calculateShippingFee(input: ShippingFeeInput): ShippingFeeResult {
+export function calculateShippingFee(input: ShippingFeeInput, dynamicConfig?: DynamicPricingConfig): ShippingFeeResult {
   const { actualWeightKg, dimensionL, dimensionW, dimensionH, baseRate, perKgRate } = input;
+  const config = dynamicConfig ?? getDefaultPricingConfig();
 
-  // Volumetric weight = (L × W × H) / 5000
+  // Volumetric weight = (L x W x H) / 5000
   const volumetricWeight = (dimensionL * dimensionW * dimensionH) / SHIPPING.volumetricDivisor;
 
   // Chargeable = whichever is higher
@@ -213,7 +270,7 @@ export function calculateShippingFee(input: ShippingFeeInput): ShippingFeeResult
 
   // SmartCom Buffer: subsidize part of the fee
   const subsidizedCustomerFee = Math.max(
-    totalFee - UPLIFT_RULES.logisticsSurcharge,
+    totalFee - config.logisticsSurcharge,
     totalFee * 0.75 // Never subsidize more than 25%
   );
   const aroobaSubsidy = totalFee - subsidizedCustomerFee;
@@ -236,18 +293,19 @@ export function calculateShippingFee(input: ShippingFeeInput): ShippingFeeResult
 
 /**
  * Determines when funds move from "pending" to "available".
- * 
+ *
  * BUSINESS RULE:
- * After delivery confirmation, funds sit in escrow for 14 days.
- * If no return is initiated, they become withdrawable.
+ * After delivery confirmation, funds sit in escrow for a configurable
+ * number of days (default 14). If no return is initiated, they become
+ * withdrawable.
  */
-export function calculateEscrowRelease(deliveryDate: Date): {
+export function calculateEscrowRelease(deliveryDate: Date, holdDays = 14): {
   releaseDate: Date;
   daysRemaining: number;
   isReleasable: boolean;
 } {
   const releaseDate = new Date(deliveryDate);
-  releaseDate.setDate(releaseDate.getDate() + 14);
+  releaseDate.setDate(releaseDate.getDate() + holdDays);
 
   const now = new Date();
   const daysRemaining = Math.max(
@@ -267,8 +325,9 @@ export function calculateEscrowRelease(deliveryDate: Date): {
 // ──────────────────────────────────────────────
 
 /**
- * Any product priced ±20% from market benchmarks is flagged.
- * This prevents price-gouging and protects customers.
+ * Any product priced beyond the configured threshold from market
+ * benchmarks is flagged. The threshold is now admin-configurable
+ * (default +-20%). This prevents price-gouging and protects customers.
  */
 export function checkPriceDeviation(
   productPrice: number,

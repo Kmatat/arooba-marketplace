@@ -42,11 +42,20 @@ const NAV_SECTIONS = [
     ],
   },
   {
+    label: 'التحكم والموافقات',
+    labelEn: 'Control & Approvals',
+    items: [
+      { id: 'approvals', labelAr: 'طابور الموافقات', labelEn: 'Approval Queue', icon: '📋' },
+      { id: 'audit', labelAr: 'سجل المراجعة', labelEn: 'Audit Trail', icon: '📜' },
+    ],
+  },
+  {
     label: 'الأدوات',
     labelEn: 'Tools',
     items: [
-      { id: 'monitoring', labelAr: 'المراقبة', labelEn: 'Monitoring', icon: '📋' },
-      { id: 'settings', labelAr: 'الإعدادات', labelEn: 'Settings', icon: '⚙️' },
+      { id: 'monitoring', labelAr: 'المراقبة', labelEn: 'Monitoring', icon: '📊' },
+      { id: 'platform-config', labelAr: 'إعدادات المنصة', labelEn: 'Platform Config', icon: '⚙️' },
+      { id: 'settings', labelAr: 'الإعدادات العامة', labelEn: 'Settings', icon: '🔧' },
     ],
   },
 ];
