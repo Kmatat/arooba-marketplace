@@ -366,3 +366,114 @@ export interface TimeSeriesData {
   value: number;
   label?: string;
 }
+
+// ──────────────────────────────────────────────
+// MODULE 7: ADMIN CONFIGURATION (Dynamic)
+// ──────────────────────────────────────────────
+
+export type ConfigCategory =
+  | 'pricing'
+  | 'uplift'
+  | 'tax'
+  | 'escrow'
+  | 'vendor_sla'
+  | 'shipping'
+  | 'loyalty'
+  | 'fraud_prevention'
+  | 'kpi_targets'
+  | 'platform';
+
+export type ConfigValueType = 'number' | 'percentage' | 'boolean' | 'json' | 'string';
+
+export interface PlatformConfig {
+  id: string;
+  key: string;
+  value: string;
+  category: ConfigCategory;
+  label: string;
+  labelAr: string;
+  description?: string;
+  descriptionAr?: string;
+  valueType: ConfigValueType;
+  defaultValue?: string;
+  minValue?: number;
+  maxValue?: number;
+  isActive: boolean;
+  requiresApproval: boolean;
+  sortOrder: number;
+  lastModifiedBy?: string;
+  updatedAt: string;
+}
+
+// ──────────────────────────────────────────────
+// MODULE 8: VENDOR APPROVAL WORKFLOW
+// ──────────────────────────────────────────────
+
+export type ApprovalStatus = 'pending' | 'approved' | 'rejected' | 'cancelled' | 'expired';
+
+export type VendorActionType =
+  | 'product_listing'
+  | 'price_change'
+  | 'profile_update'
+  | 'sub_vendor_addition'
+  | 'bank_details_change'
+  | 'category_change'
+  | 'bulk_stock_update'
+  | 'promotion_request'
+  | 'refund_request'
+  | 'account_deactivation';
+
+export interface VendorActionRequest {
+  id: string;
+  vendorId: string;
+  vendorName: string;
+  vendorNameAr: string;
+  actionType: VendorActionType;
+  status: ApprovalStatus;
+  entityType: string;
+  entityId?: string;
+  currentValues?: string;
+  proposedValues?: string;
+  justification?: string;
+  reviewedBy?: string;
+  reviewedAt?: string;
+  reviewNotes?: string;
+  priority: 1 | 2 | 3 | 4;
+  expiresAt?: string;
+  createdBy?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ──────────────────────────────────────────────
+// MODULE 9: AUDIT TRAIL
+// ──────────────────────────────────────────────
+
+export type AuditAction =
+  | 'create'
+  | 'update'
+  | 'delete'
+  | 'status_change'
+  | 'approve'
+  | 'reject'
+  | 'config_change'
+  | 'login'
+  | 'export'
+  | 'bulk_operation';
+
+export interface AuditLogEntry {
+  id: string;
+  userId: string;
+  userName: string;
+  userRole: string;
+  action: AuditAction;
+  entityType: string;
+  entityId?: string;
+  description: string;
+  descriptionAr?: string;
+  oldValues?: string;
+  newValues?: string;
+  ipAddress?: string;
+  vendorActionRequestId?: string;
+  createdAt: string;
+}

@@ -88,6 +88,15 @@ public class AroobaDbContext : DbContext, IAroobaDbContext, IApplicationDbContex
     /// <inheritdoc />
     public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
 
+    /// <inheritdoc />
+    public DbSet<PlatformConfiguration> PlatformConfigurations => Set<PlatformConfiguration>();
+
+    /// <inheritdoc />
+    public DbSet<VendorActionRequest> VendorActionRequests => Set<VendorActionRequest>();
+
+    /// <inheritdoc />
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+
     /// <summary>
     /// Applies all <see cref="IEntityTypeConfiguration{TEntity}"/> implementations
     /// found in the current assembly to the model builder.

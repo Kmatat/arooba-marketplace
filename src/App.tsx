@@ -21,6 +21,9 @@ import { OrderManagement } from './app/orders/components/OrderManagement';
 import { FinanceWaterfall } from './app/finance/components/FinanceWaterfall';
 import { VendorWalletsTable } from './app/finance/components/VendorWalletsTable';
 import { MonitoringChecklist } from './app/admin/components/MonitoringChecklist';
+import { PlatformConfigManager } from './app/admin/components/PlatformConfigManager';
+import { VendorApprovalQueue } from './app/admin/components/VendorApprovalQueue';
+import { AuditTrail } from './app/admin/components/AuditTrail';
 import { SectionHeader } from './app/shared/components';
 
 /**
@@ -54,6 +57,12 @@ function ModuleRouter() {
       return <LogisticsPlaceholder />;
     case 'monitoring':
       return <MonitoringChecklist />;
+    case 'platform-config':
+      return <PlatformConfigManager />;
+    case 'approvals':
+      return <VendorApprovalQueue />;
+    case 'audit':
+      return <AuditTrail />;
     case 'settings':
       return <SettingsPlaceholder />;
     default:
