@@ -55,6 +55,7 @@ public class Product : AuditableEntity
     public decimal VolumetricWeight { get; set; }
     public bool IsFragile { get; set; }
     public bool IsLocalOnly { get; set; }
+    public bool IsFeatured { get; set; }
     public List<string>? AllowedZoneIds { get; set; }
 
     /// <summary>

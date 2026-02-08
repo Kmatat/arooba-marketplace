@@ -90,8 +90,8 @@ public class GetVendorWalletQueryHandler : IRequestHandler<GetVendorWalletQuery,
 
         return new VendorWalletDto
         {
-            Id = wallet.Id,
-            ParentVendorId = wallet.ParentVendorId,
+            Id = wallet.VendorId,
+            ParentVendorId = wallet.VendorId,
             VendorBusinessName = vendor?.BusinessName ?? string.Empty,
             PendingBalance = wallet.PendingBalance,
             AvailableBalance = wallet.AvailableBalance,
