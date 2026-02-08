@@ -66,6 +66,15 @@ public interface IApplicationDbContext
     /// <summary>Gets the UserActivities table for analytics tracking.</summary>
     DbSet<UserActivity> UserActivities { get; }
 
+    /// <summary>Gets the CustomerReviews table.</summary>
+    DbSet<CustomerReview> CustomerReviews { get; }
+
+    /// <summary>Gets the CustomerLoginHistory table.</summary>
+    DbSet<CustomerLoginHistory> CustomerLoginHistory { get; }
+
+    /// <summary>Gets the AuditLogs table.</summary>
+    DbSet<AuditLog> AuditLogs { get; }
+
     /// <summary>
     /// Saves all pending changes to the underlying database.
     /// </summary>

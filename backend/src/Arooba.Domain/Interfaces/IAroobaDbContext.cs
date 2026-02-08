@@ -66,6 +66,12 @@ public interface IAroobaDbContext
     /// <summary>Gets the user activities table for analytics tracking.</summary>
     DbSet<UserActivity> UserActivities { get; }
 
+    /// <summary>Gets the customer reviews table.</summary>
+    DbSet<CustomerReview> CustomerReviews { get; }
+
+    /// <summary>Gets the customer login history table.</summary>
+    DbSet<CustomerLoginHistory> CustomerLoginHistory { get; }
+
     /// <summary>
     /// Saves all changes made in this context to the database.
     /// </summary>

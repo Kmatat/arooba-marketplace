@@ -6,7 +6,8 @@ namespace Arooba.Infrastructure.Persistence.Configurations;
 
 /// <summary>
 /// EF Core configuration for the <see cref="Customer"/> entity.
-/// Maps to the "Customers" table with FK to User and unique index on ReferralCode.
+/// Maps to the "Customers" table with FK to User, unique index on ReferralCode,
+/// and CRM fields for loyalty, tier, and engagement tracking.
 /// </summary>
 public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
 {
@@ -26,17 +27,42 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
             .IsRequired()
             .HasMaxLength(200);
 
+        builder.Property(c => c.FullNameAr)
+            .HasMaxLength(200);
+
+        builder.Property(c => c.MobileNumber)
+            .IsRequired()
+            .HasMaxLength(20);
+
+        builder.Property(c => c.Email)
+            .HasMaxLength(200);
+
+        builder.Property(c => c.PreferredLanguage)
+            .IsRequired()
+            .HasMaxLength(5)
+            .HasDefaultValue("ar");
+
+        builder.Property(c => c.Tier)
+            .HasConversion<string>()
+            .HasMaxLength(20);
+
         builder.Property(c => c.WalletBalance)
             .HasPrecision(18, 2);
 
         builder.Property(c => c.TotalSpent)
             .HasPrecision(18, 2);
 
+        builder.Property(c => c.AverageRating)
+            .HasPrecision(3, 1);
+
         builder.Property(c => c.ReferralCode)
             .IsRequired()
             .HasMaxLength(50);
 
         builder.HasIndex(c => c.ReferralCode)
+            .IsUnique();
+
+        builder.HasIndex(c => c.MobileNumber)
             .IsUnique();
 
         builder.Property(c => c.ReferredBy)
