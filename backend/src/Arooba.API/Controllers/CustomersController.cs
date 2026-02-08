@@ -1,22 +1,23 @@
 using Arooba.Application.Common.Models;
-using Arooba.Application.Features.Customers.Commands.AddCustomerAddress;
-using Arooba.Application.Features.Customers.Commands.CreateCustomer;
-using Arooba.Application.Features.Customers.Commands.UpdateCustomer;
-using Arooba.Application.Features.Customers.Queries.GetCustomerById;
-using Arooba.Application.Features.Customers.Queries.GetCustomers;
+using Arooba.Application.Features.Customers.Commands;
+using Arooba.Application.Features.Customers.Queries;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Arooba.API.Controllers;
 
 /// <summary>
-/// Manages customer profiles, addresses, and account information on the Arooba Marketplace.
-/// Customers can maintain multiple delivery addresses and track their order history,
-/// loyalty points, and wallet balance.
+/// Complete Customer CRM controller for the Arooba Marketplace.
+/// Manages customer profiles, addresses, orders, reviews, performance metrics,
+/// login history, activity logs, and audit trails.
 /// </summary>
 [Authorize]
 public class CustomersController : ApiControllerBase
 {
+    // ──────────────────────────────────────────────
+    // CUSTOMER LIST & PROFILE
+    // ──────────────────────────────────────────────
+
     /// <summary>
     /// Retrieves a paginated list of customers with optional search filtering.
     /// </summary>
@@ -36,7 +37,7 @@ public class CustomersController : ApiControllerBase
     {
         var query = new GetCustomersQuery
         {
-            Search = search,
+            SearchTerm = search,
             PageNumber = pageNumber,
             PageSize = pageSize
         };
@@ -46,14 +47,14 @@ public class CustomersController : ApiControllerBase
     }
 
     /// <summary>
-    /// Retrieves a single customer by identifier with their addresses, order statistics,
+    /// Retrieves a single customer by identifier with addresses, order statistics,
     /// loyalty points, and wallet balance.
     /// </summary>
     /// <param name="id">The unique identifier of the customer.</param>
     /// <param name="cancellationToken">Cancellation token for the request.</param>
     /// <returns>The customer detail including addresses and aggregated statistics.</returns>
     /// <response code="200">Customer found and returned.</response>
-    /// <response code="404">Customer with the specified identifier was not found.</response>
+    /// <response code="404">Customer not found.</response>
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(CustomerDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -61,21 +62,18 @@ public class CustomersController : ApiControllerBase
         Guid id,
         CancellationToken cancellationToken)
     {
-        var result = await Sender.Send(new GetCustomerByIdQuery(id), cancellationToken);
+        var result = await Sender.Send(new GetCustomerByIdQuery { CustomerId = id }, cancellationToken);
         return Ok(result);
     }
 
     /// <summary>
     /// Registers a new customer on the marketplace.
     /// </summary>
-    /// <param name="command">
-    /// The customer registration details including name, mobile number (+20 format),
-    /// optional email, and optional referral code.
-    /// </param>
+    /// <param name="command">The customer registration details.</param>
     /// <param name="cancellationToken">Cancellation token for the request.</param>
     /// <returns>The identifier of the newly created customer.</returns>
     /// <response code="201">Customer registered successfully.</response>
-    /// <response code="400">Validation failed (e.g., duplicate mobile number).</response>
+    /// <response code="400">Validation failed.</response>
     [HttpPost]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -96,7 +94,7 @@ public class CustomersController : ApiControllerBase
     /// <returns>No content on success.</returns>
     /// <response code="204">Customer profile updated successfully.</response>
     /// <response code="400">Validation failed or identifier mismatch.</response>
-    /// <response code="404">Customer with the specified identifier was not found.</response>
+    /// <response code="404">Customer not found.</response>
     [HttpPut("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -106,7 +104,7 @@ public class CustomersController : ApiControllerBase
         [FromBody] UpdateCustomerCommand command,
         CancellationToken cancellationToken)
     {
-        if (id != command.Id)
+        if (id != command.CustomerId)
         {
             return BadRequest(new ProblemDetails
             {
@@ -121,22 +119,58 @@ public class CustomersController : ApiControllerBase
     }
 
     /// <summary>
+    /// Updates a customer's account status (activate, deactivate, block, unblock).
+    /// </summary>
+    /// <param name="id">The unique identifier of the customer.</param>
+    /// <param name="command">The status update details.</param>
+    /// <param name="cancellationToken">Cancellation token for the request.</param>
+    /// <returns>No content on success.</returns>
+    /// <response code="204">Customer status updated successfully.</response>
+    /// <response code="400">Validation failed.</response>
+    /// <response code="404">Customer not found.</response>
+    [HttpPut("{id:guid}/status")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateCustomerStatus(
+        Guid id,
+        [FromBody] UpdateCustomerStatusCommand command,
+        CancellationToken cancellationToken)
+    {
+        if (id != command.CustomerId)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Title = "Identifier Mismatch",
+                Detail = "The route identifier does not match the command identifier.",
+                Status = StatusCodes.Status400BadRequest
+            });
+        }
+
+        await Sender.Send(command, cancellationToken);
+        return NoContent();
+    }
+
+    // ──────────────────────────────────────────────
+    // ADDRESSES
+    // ──────────────────────────────────────────────
+
+    /// <summary>
     /// Retrieves a customer's delivery addresses.
     /// </summary>
     /// <param name="id">The unique identifier of the customer.</param>
     /// <param name="cancellationToken">Cancellation token for the request.</param>
-    /// <returns>A list of the customer's addresses.</returns>
+    /// <returns>The customer detail with addresses.</returns>
     /// <response code="200">Addresses retrieved successfully.</response>
-    /// <response code="404">Customer with the specified identifier was not found.</response>
+    /// <response code="404">Customer not found.</response>
     [HttpGet("{id:guid}/addresses")]
-    [ProducesResponseType(typeof(IReadOnlyList<CustomerAddressDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(CustomerDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetAddresses(
         Guid id,
         CancellationToken cancellationToken)
     {
-        // GetCustomerByIdQuery includes addresses; return the customer with addresses
-        var customer = await Sender.Send(new GetCustomerByIdQuery(id), cancellationToken);
+        var customer = await Sender.Send(new GetCustomerByIdQuery { CustomerId = id }, cancellationToken);
         return Ok(customer);
     }
 
@@ -144,15 +178,12 @@ public class CustomersController : ApiControllerBase
     /// Adds a new delivery address to a customer's address book.
     /// </summary>
     /// <param name="id">The unique identifier of the customer.</param>
-    /// <param name="command">
-    /// The address details including label (Home, Office), full address, city,
-    /// zone identifier, and whether this should be the default address.
-    /// </param>
+    /// <param name="command">The address details.</param>
     /// <param name="cancellationToken">Cancellation token for the request.</param>
     /// <returns>The identifier of the newly created address.</returns>
     /// <response code="201">Address added successfully.</response>
-    /// <response code="400">Validation failed or customer identifier mismatch.</response>
-    /// <response code="404">Customer with the specified identifier was not found.</response>
+    /// <response code="400">Validation failed.</response>
+    /// <response code="404">Customer not found.</response>
     [HttpPost("{id:guid}/addresses")]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -174,5 +205,160 @@ public class CustomersController : ApiControllerBase
 
         var addressId = await Sender.Send(command, cancellationToken);
         return CreatedAtAction(nameof(GetCustomer), new { id }, addressId);
+    }
+
+    // ──────────────────────────────────────────────
+    // REVIEWS & RATINGS
+    // ──────────────────────────────────────────────
+
+    /// <summary>
+    /// Retrieves all reviews submitted by a specific customer.
+    /// </summary>
+    /// <param name="id">The unique identifier of the customer.</param>
+    /// <param name="cancellationToken">Cancellation token for the request.</param>
+    /// <returns>A list of customer reviews with product and order context.</returns>
+    /// <response code="200">Reviews retrieved successfully.</response>
+    [HttpGet("{id:guid}/reviews")]
+    [ProducesResponseType(typeof(List<CustomerReviewDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetCustomerReviews(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var result = await Sender.Send(new GetCustomerReviewsQuery { CustomerId = id }, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Submits a product review from a customer for a specific order.
+    /// </summary>
+    /// <param name="id">The unique identifier of the customer.</param>
+    /// <param name="command">The review details including rating and optional text.</param>
+    /// <param name="cancellationToken">Cancellation token for the request.</param>
+    /// <returns>The identifier of the newly created review.</returns>
+    /// <response code="201">Review submitted successfully.</response>
+    /// <response code="400">Validation failed or duplicate review.</response>
+    /// <response code="404">Customer or order not found.</response>
+    [HttpPost("{id:guid}/reviews")]
+    [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> SubmitReview(
+        Guid id,
+        [FromBody] SubmitReviewCommand command,
+        CancellationToken cancellationToken)
+    {
+        if (id != command.CustomerId)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Title = "Identifier Mismatch",
+                Detail = "The route customer identifier does not match the command.",
+                Status = StatusCodes.Status400BadRequest
+            });
+        }
+
+        var reviewId = await Sender.Send(command, cancellationToken);
+        return CreatedAtAction(nameof(GetCustomerReviews), new { id }, reviewId);
+    }
+
+    // ──────────────────────────────────────────────
+    // PERFORMANCE & LOYALTY
+    // ──────────────────────────────────────────────
+
+    /// <summary>
+    /// Retrieves performance metrics for a customer including RFM scores,
+    /// loyalty tier progress, spending trends, and referral statistics.
+    /// </summary>
+    /// <param name="id">The unique identifier of the customer.</param>
+    /// <param name="cancellationToken">Cancellation token for the request.</param>
+    /// <returns>Customer performance and loyalty metrics.</returns>
+    /// <response code="200">Performance data retrieved successfully.</response>
+    /// <response code="404">Customer not found.</response>
+    [HttpGet("{id:guid}/performance")]
+    [ProducesResponseType(typeof(CustomerPerformanceDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetCustomerPerformance(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var result = await Sender.Send(new GetCustomerPerformanceQuery { CustomerId = id }, cancellationToken);
+        return Ok(result);
+    }
+
+    // ──────────────────────────────────────────────
+    // LOGIN HISTORY
+    // ──────────────────────────────────────────────
+
+    /// <summary>
+    /// Retrieves login history for a customer with device, IP, and session data.
+    /// </summary>
+    /// <param name="id">The unique identifier of the customer.</param>
+    /// <param name="limit">Maximum number of entries to return. Defaults to 50.</param>
+    /// <param name="cancellationToken">Cancellation token for the request.</param>
+    /// <returns>A list of login history entries.</returns>
+    /// <response code="200">Login history retrieved successfully.</response>
+    [HttpGet("{id:guid}/logins")]
+    [ProducesResponseType(typeof(List<CustomerLoginDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetLoginHistory(
+        Guid id,
+        [FromQuery] int limit = 50,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await Sender.Send(
+            new GetCustomerLoginHistoryQuery { CustomerId = id, Limit = limit },
+            cancellationToken);
+        return Ok(result);
+    }
+
+    // ──────────────────────────────────────────────
+    // ACTIVITY LOG
+    // ──────────────────────────────────────────────
+
+    /// <summary>
+    /// Retrieves user activity timeline for a customer including product views,
+    /// searches, cart actions, purchases, and more.
+    /// </summary>
+    /// <param name="id">The unique identifier of the customer.</param>
+    /// <param name="limit">Maximum number of entries to return. Defaults to 50.</param>
+    /// <param name="cancellationToken">Cancellation token for the request.</param>
+    /// <returns>A list of activity entries.</returns>
+    /// <response code="200">Activity log retrieved successfully.</response>
+    [HttpGet("{id:guid}/activity")]
+    [ProducesResponseType(typeof(List<CustomerActivityDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetCustomerActivity(
+        Guid id,
+        [FromQuery] int limit = 50,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await Sender.Send(
+            new GetCustomerActivityQuery { CustomerId = id, Limit = limit },
+            cancellationToken);
+        return Ok(result);
+    }
+
+    // ──────────────────────────────────────────────
+    // AUDIT LOGS
+    // ──────────────────────────────────────────────
+
+    /// <summary>
+    /// Retrieves audit log entries related to a specific customer including
+    /// account changes, tier upgrades, wallet transactions, and admin actions.
+    /// </summary>
+    /// <param name="id">The unique identifier of the customer.</param>
+    /// <param name="limit">Maximum number of entries to return. Defaults to 50.</param>
+    /// <param name="cancellationToken">Cancellation token for the request.</param>
+    /// <returns>A list of audit log entries.</returns>
+    /// <response code="200">Audit logs retrieved successfully.</response>
+    [HttpGet("{id:guid}/audit-logs")]
+    [ProducesResponseType(typeof(List<CustomerAuditLogDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetCustomerAuditLogs(
+        Guid id,
+        [FromQuery] int limit = 50,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await Sender.Send(
+            new GetCustomerAuditLogsQuery { CustomerId = id, Limit = limit },
+            cancellationToken);
+        return Ok(result);
     }
 }

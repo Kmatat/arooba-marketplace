@@ -25,6 +25,7 @@ import { PlatformConfigManager } from './app/admin/components/PlatformConfigMana
 import { VendorApprovalQueue } from './app/admin/components/VendorApprovalQueue';
 import { AuditTrail } from './app/admin/components/AuditTrail';
 import { UserAnalyticsDashboard } from './app/analytics/components/UserAnalyticsDashboard';
+import { CustomerCRM } from './app/customers/components/CustomerCRM';
 import { SectionHeader } from './app/shared/components';
 
 /**
@@ -55,7 +56,7 @@ function ModuleRouter() {
     case 'pricing':
       return <FinanceWaterfall />;
     case 'customers':
-      return <CustomersPlaceholder />;
+      return <CustomerCRM />;
     case 'logistics':
       return <LogisticsPlaceholder />;
     case 'monitoring':
@@ -76,39 +77,6 @@ function ModuleRouter() {
 // ──────────────────────────────────────────────
 // PLACEHOLDER MODULES (to be built out)
 // ──────────────────────────────────────────────
-
-function CustomersPlaceholder() {
-  return (
-    <div className="space-y-6">
-      <SectionHeader title="👥 إدارة العملاء" subtitle="قريباً — نظام الولاء والاشتراكات" />
-      <div className="card p-8 text-center">
-        <span className="text-5xl mb-4 block">🚧</span>
-        <p className="text-lg font-bold text-earth-700 mb-2">قيد التطوير</p>
-        <p className="text-sm text-earth-500 max-w-md mx-auto">
-          هذا القسم سيتضمن إدارة العملاء، نظام الولاء (نقطة لكل جنيه)،
-          برنامج الإحالة (أعطي 50 / خد 50)، وإدارة الاشتراكات الأسبوعية.
-        </p>
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg mx-auto">
-          <div className="p-4 rounded-xl bg-arooba-50 border border-arooba-100">
-            <p className="text-2xl mb-1">💎</p>
-            <p className="text-xs font-medium text-arooba-700">نقاط الولاء</p>
-            <p className="text-[10px] text-earth-500">1 نقطة = 1 جنيه</p>
-          </div>
-          <div className="p-4 rounded-xl bg-nile-50 border border-nile-100">
-            <p className="text-2xl mb-1">🎁</p>
-            <p className="text-xs font-medium text-nile-700">الإحالات</p>
-            <p className="text-[10px] text-earth-500">أعطي 50 / خد 50</p>
-          </div>
-          <div className="p-4 rounded-xl bg-blue-50 border border-blue-100">
-            <p className="text-2xl mb-1">📦</p>
-            <p className="text-xs font-medium text-blue-700">صندوق الأسبوع</p>
-            <p className="text-[10px] text-earth-500">اشتراك أسبوعي</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function LogisticsPlaceholder() {
   return (

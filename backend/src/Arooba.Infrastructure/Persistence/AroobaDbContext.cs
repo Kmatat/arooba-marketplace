@@ -100,6 +100,12 @@ public class AroobaDbContext : DbContext, IAroobaDbContext, IApplicationDbContex
     /// <inheritdoc />
     public DbSet<UserActivity> UserActivities => Set<UserActivity>();
 
+    /// <inheritdoc />
+    public DbSet<CustomerReview> CustomerReviews => Set<CustomerReview>();
+
+    /// <inheritdoc />
+    public DbSet<CustomerLoginHistory> CustomerLoginHistory => Set<CustomerLoginHistory>();
+
     /// <summary>
     /// Applies all <see cref="IEntityTypeConfiguration{TEntity}"/> implementations
     /// found in the current assembly to the model builder.
