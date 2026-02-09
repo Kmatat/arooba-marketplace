@@ -197,7 +197,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Gui
                 ProductTitle = product.Title,
                 ProductSku = product.Sku,
                 ProductImage = product.Images?.FirstOrDefault(),
-                VendorName = product.ParentVendor?.BusinessName ?? string.Empty,
+                VendorName = product.ParentVendor?.BusinessNameAr ?? string.Empty,
                 Quantity = itemRequest.Quantity,
                 UnitPrice = product.FinalPrice,
                 TotalPrice = itemTotalPrice,

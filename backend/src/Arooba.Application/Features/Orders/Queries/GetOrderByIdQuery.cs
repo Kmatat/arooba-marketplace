@@ -102,7 +102,7 @@ public record ShipmentDto
 /// <summary>
 /// Detailed DTO for a single order including items, shipments, and full financial breakdown.
 /// </summary>
-public record OrderDetailDto
+public record OrderDetailDto_v2
 {
     /// <summary>Gets the order identifier.</summary>
     public Guid Id { get; init; }
@@ -191,12 +191,12 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>A detailed order DTO.</returns>
     /// <exception cref="NotFoundException">Thrown when the order is not found.</exception>
-    public async Task<OrderDetailDto> Handle(
+    public async Task<OrderDetailDto_v2> Handle(
         GetOrderByIdQuery request,
         CancellationToken cancellationToken)
     {
         var order = await _context.Orders
-            .Include(o => o.OrderItems)
+            .Include(o => o.Items)
             .Include(o => o.Shipments)
             .Include(o => o.Customer)
             .AsNoTracking()

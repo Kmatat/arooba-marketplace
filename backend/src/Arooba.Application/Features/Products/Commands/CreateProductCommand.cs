@@ -1,5 +1,6 @@
 using Arooba.Application.Common.Exceptions;
 using Arooba.Application.Common.Interfaces;
+using Arooba.Application.Common.Models;
 using Arooba.Domain.Entities;
 using Arooba.Domain.Enums;
 using MediatR;
@@ -128,7 +129,7 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
 
             if (subVendor is not null)
             {
-                parentUpliftType = subVendor.UpliftType.ToString().ToLowerInvariant();
+                parentUpliftType = subVendor.UpliftType.HasValue.ToString().ToLowerInvariant();
                 parentUpliftValue = subVendor.UpliftValue;
             }
         }
@@ -138,7 +139,7 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
             VendorBasePrice: request.SellingPrice,
             CategoryId: request.CategoryId,
             IsVendorVatRegistered: vendor.IsVatRegistered,
-            IsNonLegalizedVendor: vendor.Type == VendorType.NonLegalized,
+            IsNonLegalizedVendor: vendor.VendorType == VendorType.NonLegalized,
             ParentUpliftType: parentUpliftType,
             ParentUpliftValue: parentUpliftValue,
             CustomUpliftOverride: request.CustomUpliftOverride
@@ -147,7 +148,7 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
         var pricingResult = _pricingService.CalculatePrice(pricingInput);
 
         // Step 5: Generate SKU
-        var sku = GenerateSku(vendor.BusinessName, request.CategoryId, now);
+        var sku = GenerateSku(vendor.BusinessNameAr, request.CategoryId, now);
 
         // Step 6: Calculate volumetric weight
         var volumetricWeight = (request.DimensionL * request.DimensionW * request.DimensionH) / 5000m;
@@ -174,7 +175,7 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
             VendorNetPayout = pricingResult.BucketA_VendorRevenue,
             CommissionAmount = pricingResult.BucketC_AroobaRevenue,
             VatAmount = pricingResult.BucketB_VendorVat + pricingResult.BucketD_AroobaVat,
-            ParentUpliftAmount = pricingResult.ParentVendorUplift,
+            ParentUpliftAmount = pricingResult.ParentUpliftAmount,
             WithholdingTaxAmount = 0m, // Calculated at payout time
 
             // Stock management

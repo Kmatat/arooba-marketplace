@@ -1,6 +1,6 @@
 namespace Arooba.Application.Features.Orders.Queries;
 
-public record OrderDto
+public record OrderDto_v2
 {
     public Guid Id { get; init; }
     public string OrderNumber { get; init; } = string.Empty;

@@ -62,7 +62,7 @@ public class UpdateOrderStatusCommandHandler : IRequestHandler<UpdateOrderStatus
         var now = _dateTime.UtcNow;
 
         var order = await _context.Orders
-            .Include(o => o.OrderItems)
+            .Include(o => o.Items)
             .Include(o => o.Shipments)
             .FirstOrDefaultAsync(o => o.Id == request.OrderId, cancellationToken);
 
@@ -172,7 +172,7 @@ public class UpdateOrderStatusCommandHandler : IRequestHandler<UpdateOrderStatus
         DateTime now,
         CancellationToken cancellationToken)
     {
-        var shipmentItems = order.OrderItems?
+        var shipmentItems = order.Items?
             .Where(oi => oi.ShipmentId == shipment.Id)
             .ToList() ?? new List<OrderItem>();
 
@@ -220,7 +220,7 @@ public class UpdateOrderStatusCommandHandler : IRequestHandler<UpdateOrderStatus
         DateTime now,
         CancellationToken cancellationToken)
     {
-        var shipmentItems = order.OrderItems?
+        var shipmentItems = order.Items?
             .Where(oi => oi.ShipmentId == shipment.Id)
             .ToList() ?? new List<OrderItem>();
 
@@ -288,9 +288,9 @@ public class UpdateOrderStatusCommandHandler : IRequestHandler<UpdateOrderStatus
         DateTime now,
         CancellationToken cancellationToken)
     {
-        if (order.OrderItems is null) return;
+        if (order.Items is null) return;
 
-        var vendorGroups = order.OrderItems.GroupBy(oi => oi.ParentVendorId);
+        var vendorGroups = order.Items.GroupBy(oi => oi.ParentVendorId);
 
         foreach (var vendorGroup in vendorGroups)
         {
@@ -315,7 +315,7 @@ public class UpdateOrderStatusCommandHandler : IRequestHandler<UpdateOrderStatus
                 VendorAmount = -vendorPayout,
                 CommissionAmount = -vendorGroup.Sum(oi => oi.CommissionAmount),
                 VatAmount = -vendorGroup.Sum(oi => oi.VatAmount),
-                Description = $"Order {order.OrderNumber} cancelled",
+                Description = $"Order {order.Items} cancelled",
                 BalanceStatus = BalanceStatus.Available,
                 CreatedAt = now
             };
@@ -324,7 +324,7 @@ public class UpdateOrderStatusCommandHandler : IRequestHandler<UpdateOrderStatus
         }
 
         // Restore stock for all items
-        foreach (var item in order.OrderItems)
+        foreach (var item in order.Items)
         {
             var product = await _context.Products
                 .FirstOrDefaultAsync(p => p.Id == item.ProductId, cancellationToken);

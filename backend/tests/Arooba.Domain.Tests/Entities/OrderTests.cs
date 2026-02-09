@@ -1,6 +1,7 @@
 using Arooba.Domain.Entities;
 using Arooba.Domain.Enums;
 using FluentAssertions;
+using Xunit;
 
 namespace Arooba.Domain.Tests.Entities;
 

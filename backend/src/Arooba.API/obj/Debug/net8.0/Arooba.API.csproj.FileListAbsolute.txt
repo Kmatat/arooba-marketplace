@@ -1,0 +1,8 @@
+D:\Teleware\arooba\backend\src\Arooba.API\obj\Debug\net8.0\Arooba.API.csproj.AssemblyReference.cache
+D:\Teleware\arooba\backend\src\Arooba.API\obj\Debug\net8.0\rpswa.dswa.cache.json
+D:\Teleware\arooba\backend\src\Arooba.API\obj\Debug\net8.0\Arooba.API.GeneratedMSBuildEditorConfig.editorconfig
+D:\Teleware\arooba\backend\src\Arooba.API\obj\Debug\net8.0\Arooba.API.AssemblyInfoInputs.cache
+D:\Teleware\arooba\backend\src\Arooba.API\obj\Debug\net8.0\Arooba.API.AssemblyInfo.cs
+D:\Teleware\arooba\backend\src\Arooba.API\obj\Debug\net8.0\Arooba.API.csproj.CoreCompileInputs.cache
+D:\Teleware\arooba\backend\src\Arooba.API\obj\Debug\net8.0\Arooba.API.MvcApplicationPartsAssemblyInfo.cache
+D:\Teleware\arooba\backend\src\Arooba.API\obj\Debug\net8.0\Arooba.API.sourcelink.json

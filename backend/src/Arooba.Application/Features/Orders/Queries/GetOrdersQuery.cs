@@ -2,7 +2,6 @@ using Arooba.Application.Common.Interfaces;
 using Arooba.Application.Common.Models;
 using Arooba.Domain.Enums;
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -114,7 +113,7 @@ public class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, PaginatedLi
         CancellationToken cancellationToken)
     {
         var query = _context.Orders
-            .Include(o => o.OrderItems)
+            .Include(o => o.OrderNumber)
             .Include(o => o.Shipments)
             .AsNoTracking()
             .AsQueryable();
@@ -161,12 +160,12 @@ public class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, PaginatedLi
             CustomerId = o.CustomerId,
             Status = o.Status,
             PaymentMethod = o.PaymentMethod,
-            SubTotal = o.SubTotal,
-            TotalShippingFee = o.TotalShippingFee,
+            SubTotal = o.Subtotal,
+            TotalShippingFee = o.TotalDeliveryFee,
             TotalAmount = o.TotalAmount,
-            ItemCount = o.OrderItems != null ? o.OrderItems.Sum(oi => oi.Quantity) : 0,
+            ItemCount = o.OrderNumber != null ? o.OrderNumber.Sum(oi => oi.Quantity) : 0,
             ShipmentCount = o.Shipments != null ? o.Shipments.Count : 0,
-            DeliveryCity = o.DeliveryCity,
+            //DeliveryCity = o.DeliveryCity.ToString(),
             CreatedAt = o.CreatedAt,
             DeliveredAt = o.DeliveredAt
         });
