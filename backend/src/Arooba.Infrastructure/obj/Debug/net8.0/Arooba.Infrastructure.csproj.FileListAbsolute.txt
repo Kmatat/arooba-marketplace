@@ -4,3 +4,17 @@ D:\Teleware\arooba\backend\src\Arooba.Infrastructure\obj\Debug\net8.0\Arooba.Inf
 D:\Teleware\arooba\backend\src\Arooba.Infrastructure\obj\Debug\net8.0\Arooba.Infrastructure.AssemblyInfo.cs
 D:\Teleware\arooba\backend\src\Arooba.Infrastructure\obj\Debug\net8.0\Arooba.Infrastructure.csproj.CoreCompileInputs.cache
 D:\Teleware\arooba\backend\src\Arooba.Infrastructure\obj\Debug\net8.0\Arooba.Infrastructure.sourcelink.json
+D:\Teleware\arooba\backend\src\Arooba.Infrastructure\bin\Debug\net8.0\Arooba.Infrastructure.deps.json
+D:\Teleware\arooba\backend\src\Arooba.Infrastructure\bin\Debug\net8.0\Arooba.Infrastructure.runtimeconfig.json
+D:\Teleware\arooba\backend\src\Arooba.Infrastructure\bin\Debug\net8.0\Arooba.Infrastructure.dll
+D:\Teleware\arooba\backend\src\Arooba.Infrastructure\bin\Debug\net8.0\Arooba.Infrastructure.pdb
+D:\Teleware\arooba\backend\src\Arooba.Infrastructure\bin\Debug\net8.0\Arooba.Application.dll
+D:\Teleware\arooba\backend\src\Arooba.Infrastructure\bin\Debug\net8.0\Arooba.Domain.dll
+D:\Teleware\arooba\backend\src\Arooba.Infrastructure\bin\Debug\net8.0\Arooba.Application.pdb
+D:\Teleware\arooba\backend\src\Arooba.Infrastructure\bin\Debug\net8.0\Arooba.Domain.pdb
+D:\Teleware\arooba\backend\src\Arooba.Infrastructure\obj\Debug\net8.0\Arooba.I.4EF81BF9.Up2Date
+D:\Teleware\arooba\backend\src\Arooba.Infrastructure\obj\Debug\net8.0\Arooba.Infrastructure.dll
+D:\Teleware\arooba\backend\src\Arooba.Infrastructure\obj\Debug\net8.0\refint\Arooba.Infrastructure.dll
+D:\Teleware\arooba\backend\src\Arooba.Infrastructure\obj\Debug\net8.0\Arooba.Infrastructure.pdb
+D:\Teleware\arooba\backend\src\Arooba.Infrastructure\obj\Debug\net8.0\Arooba.Infrastructure.genruntimeconfig.cache
+D:\Teleware\arooba\backend\src\Arooba.Infrastructure\obj\Debug\net8.0\ref\Arooba.Infrastructure.dll

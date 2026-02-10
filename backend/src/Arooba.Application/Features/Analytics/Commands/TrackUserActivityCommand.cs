@@ -8,13 +8,13 @@ namespace Arooba.Application.Features.Analytics.Commands;
 /// <summary>
 /// Command to record a user activity event for analytics tracking.
 /// </summary>
-public record TrackUserActivityCommand : IRequest<Guid>
+public record TrackUserActivityCommand : IRequest<int>
 {
-    public Guid UserId { get; init; }
+    public int UserId { get; init; }
     public UserActivityAction Action { get; init; }
-    public Guid? ProductId { get; init; }
+    public int? ProductId { get; init; }
     public string? CategoryId { get; init; }
-    public Guid? OrderId { get; init; }
+    public int? OrderId { get; init; }
     public string? SearchQuery { get; init; }
     public string? Metadata { get; init; }
     public string? SessionId { get; init; }
@@ -30,7 +30,7 @@ public record TrackUserActivityCommand : IRequest<Guid>
 /// <summary>
 /// Handles persisting a user activity event to the database.
 /// </summary>
-public class TrackUserActivityCommandHandler : IRequestHandler<TrackUserActivityCommand, Guid>
+public class TrackUserActivityCommandHandler : IRequestHandler<TrackUserActivityCommand, int>
 {
     private readonly IApplicationDbContext _context;
 
@@ -39,11 +39,11 @@ public class TrackUserActivityCommandHandler : IRequestHandler<TrackUserActivity
         _context = context;
     }
 
-    public async Task<Guid> Handle(TrackUserActivityCommand request, CancellationToken cancellationToken)
+    public async Task<int> Handle(TrackUserActivityCommand request, CancellationToken cancellationToken)
     {
         var activity = new UserActivity
         {
-            Id = Guid.NewGuid(),
+            Id = new int(),
             UserId = request.UserId,
             Action = request.Action,
             ProductId = request.ProductId,

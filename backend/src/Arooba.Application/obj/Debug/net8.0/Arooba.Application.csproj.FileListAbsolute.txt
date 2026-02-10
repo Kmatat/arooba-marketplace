@@ -1,6 +1,16 @@
+D:\Teleware\arooba\backend\src\Arooba.Application\bin\Debug\net8.0\Arooba.Application.deps.json
+D:\Teleware\arooba\backend\src\Arooba.Application\bin\Debug\net8.0\Arooba.Application.dll
+D:\Teleware\arooba\backend\src\Arooba.Application\bin\Debug\net8.0\Arooba.Application.pdb
+D:\Teleware\arooba\backend\src\Arooba.Application\bin\Debug\net8.0\Arooba.Domain.dll
+D:\Teleware\arooba\backend\src\Arooba.Application\bin\Debug\net8.0\Arooba.Domain.pdb
 D:\Teleware\arooba\backend\src\Arooba.Application\obj\Debug\net8.0\Arooba.Application.csproj.AssemblyReference.cache
 D:\Teleware\arooba\backend\src\Arooba.Application\obj\Debug\net8.0\Arooba.Application.GeneratedMSBuildEditorConfig.editorconfig
 D:\Teleware\arooba\backend\src\Arooba.Application\obj\Debug\net8.0\Arooba.Application.AssemblyInfoInputs.cache
 D:\Teleware\arooba\backend\src\Arooba.Application\obj\Debug\net8.0\Arooba.Application.AssemblyInfo.cs
 D:\Teleware\arooba\backend\src\Arooba.Application\obj\Debug\net8.0\Arooba.Application.csproj.CoreCompileInputs.cache
 D:\Teleware\arooba\backend\src\Arooba.Application\obj\Debug\net8.0\Arooba.Application.sourcelink.json
+D:\Teleware\arooba\backend\src\Arooba.Application\obj\Debug\net8.0\Arooba.A.783A8E07.Up2Date
+D:\Teleware\arooba\backend\src\Arooba.Application\obj\Debug\net8.0\Arooba.Application.dll
+D:\Teleware\arooba\backend\src\Arooba.Application\obj\Debug\net8.0\refint\Arooba.Application.dll
+D:\Teleware\arooba\backend\src\Arooba.Application\obj\Debug\net8.0\Arooba.Application.pdb
+D:\Teleware\arooba\backend\src\Arooba.Application\obj\Debug\net8.0\ref\Arooba.Application.dll

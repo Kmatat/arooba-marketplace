@@ -10,7 +10,7 @@ namespace Arooba.Application.Features.Customers.Queries;
 public record GetCustomerAuditLogsQuery : IRequest<List<CustomerAuditLogDto>>
 {
     /// <summary>Gets the customer identifier.</summary>
-    public Guid CustomerId { get; init; }
+    public int CustomerId { get; init; }
 
     /// <summary>Gets the maximum number of entries to return. Defaults to 50.</summary>
     public int Limit { get; init; } = 50;
@@ -21,7 +21,7 @@ public record GetCustomerAuditLogsQuery : IRequest<List<CustomerAuditLogDto>>
 /// </summary>
 public record CustomerAuditLogDto
 {
-    public Guid Id { get; init; }
+    public int Id { get; init; }
     public string UserId { get; init; } = default!;
     public string UserName { get; init; } = default!;
     public string UserRole { get; init; } = default!;

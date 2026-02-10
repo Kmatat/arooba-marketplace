@@ -12,13 +12,13 @@ namespace Arooba.Application.Features.Finance.Commands;
 /// Command to manually record a financial ledger entry for a vendor.
 /// Used for adjustments, refunds, or manual corrections.
 /// </summary>
-public record RecordLedgerEntryCommand : IRequest<Guid>
+public record RecordLedgerEntryCommand : IRequest<int>
 {
     /// <summary>Gets the vendor identifier.</summary>
-    public Guid VendorId { get; init; }
+    public int VendorId { get; init; }
 
     /// <summary>Gets the optional related order identifier.</summary>
-    public Guid? OrderId { get; init; }
+    public int? OrderId { get; init; }
 
     /// <summary>Gets the transaction type.</summary>
     public TransactionType TransactionType { get; init; }
@@ -45,7 +45,7 @@ public record RecordLedgerEntryCommand : IRequest<Guid>
 /// <summary>
 /// Handles recording a manual ledger entry and updating the vendor wallet accordingly.
 /// </summary>
-public class RecordLedgerEntryCommandHandler : IRequestHandler<RecordLedgerEntryCommand, Guid>
+public class RecordLedgerEntryCommandHandler : IRequestHandler<RecordLedgerEntryCommand, int>
 {
     private readonly IApplicationDbContext _context;
     private readonly IDateTimeService _dateTime;
@@ -69,7 +69,7 @@ public class RecordLedgerEntryCommandHandler : IRequestHandler<RecordLedgerEntry
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>The unique identifier of the created ledger entry.</returns>
     /// <exception cref="NotFoundException">Thrown when the vendor wallet is not found.</exception>
-    public async Task<Guid> Handle(RecordLedgerEntryCommand request, CancellationToken cancellationToken)
+    public async Task<int> Handle(RecordLedgerEntryCommand request, CancellationToken cancellationToken)
     {
         var wallet = await _context.VendorWallets
             .FirstOrDefaultAsync(w => w.ParentVendorId == request.VendorId, cancellationToken);
@@ -80,7 +80,7 @@ public class RecordLedgerEntryCommandHandler : IRequestHandler<RecordLedgerEntry
         }
 
         var now = _dateTime.UtcNow;
-        var ledgerEntryId = Guid.NewGuid();
+        var ledgerEntryId = new int();
 
         var ledgerEntry = new LedgerEntry
         {

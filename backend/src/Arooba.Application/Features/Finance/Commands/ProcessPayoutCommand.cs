@@ -12,10 +12,10 @@ namespace Arooba.Application.Features.Finance.Commands;
 /// Command to process a vendor payout from their available wallet balance.
 /// Enforces the minimum payout threshold of 500 EGP as per Arooba's financial policy.
 /// </summary>
-public record ProcessPayoutCommand : IRequest<Guid>
+public record ProcessPayoutCommand : IRequest<int>
 {
     /// <summary>Gets the vendor identifier to process the payout for.</summary>
-    public Guid VendorId { get; init; }
+    public int VendorId { get; init; }
 
     /// <summary>Gets the payout amount in EGP.</summary>
     public decimal Amount { get; init; }
@@ -27,7 +27,7 @@ public record ProcessPayoutCommand : IRequest<Guid>
 /// <summary>
 /// Handles vendor payout processing with minimum threshold and balance validation.
 /// </summary>
-public class ProcessPayoutCommandHandler : IRequestHandler<ProcessPayoutCommand, Guid>
+public class ProcessPayoutCommandHandler : IRequestHandler<ProcessPayoutCommand, int>
 {
     private readonly IApplicationDbContext _context;
     private readonly IDateTimeService _dateTime;
@@ -57,7 +57,7 @@ public class ProcessPayoutCommandHandler : IRequestHandler<ProcessPayoutCommand,
     /// <returns>The unique identifier of the created payout ledger entry.</returns>
     /// <exception cref="NotFoundException">Thrown when the vendor wallet is not found.</exception>
     /// <exception cref="BadRequestException">Thrown when payout amount is below threshold or exceeds available balance.</exception>
-    public async Task<Guid> Handle(ProcessPayoutCommand request, CancellationToken cancellationToken)
+    public async Task<int> Handle(ProcessPayoutCommand request, CancellationToken cancellationToken)
     {
         var wallet = await _context.VendorWallets
             .FirstOrDefaultAsync(w => w.ParentVendorId == request.VendorId, cancellationToken);
@@ -84,7 +84,7 @@ public class ProcessPayoutCommandHandler : IRequestHandler<ProcessPayoutCommand,
         }
 
         var now = _dateTime.UtcNow;
-        var ledgerEntryId = Guid.NewGuid();
+        var ledgerEntryId = new int();
 
         // Deduct from wallet
         wallet.AvailableBalance -= request.Amount;

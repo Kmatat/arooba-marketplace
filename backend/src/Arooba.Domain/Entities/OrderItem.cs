@@ -5,9 +5,9 @@ namespace Arooba.Domain.Entities;
 /// <summary>Represents a line item in an order.</summary>
 public class OrderItem : AuditableEntity
 {
-    public Guid OrderId { get; set; }
+    public int OrderId { get; set; }
     public Order? Order { get; set; }
-    public Guid ProductId { get; set; }
+    public int ProductId { get; set; }
     public Product? Product { get; set; }
     public string ProductTitle { get; set; } = string.Empty;
     public string ProductSku { get; set; } = string.Empty;
@@ -33,15 +33,15 @@ public class OrderItem : AuditableEntity
     public decimal WithholdingTaxAmount { get; set; }
 
     /// <summary>The parent vendor who owns this product.</summary>
-    public Guid ParentVendorId { get; set; }
+    public int ParentVendorId { get; set; }
 
     /// <summary>The sub-vendor who created this product (optional).</summary>
-    public Guid? SubVendorId { get; set; }
+    public int? SubVendorId { get; set; }
 
     /// <summary>The pickup location for this item.</summary>
-    public Guid? PickupLocationId { get; set; }
+    public int? PickupLocationId { get; set; }
 
     /// <summary>The shipment this item is assigned to.</summary>
-    public Guid? ShipmentId { get; set; }
+    public int? ShipmentId { get; set; }
     public Shipment? Shipment { get; set; }
 }

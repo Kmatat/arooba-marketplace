@@ -5,6 +5,7 @@ using Arooba.Application.Features.Products.Commands;
 using Arooba.Application.Features.Products.Queries;
 using Arooba.Application.Features.Shipping.Queries;
 using Arooba.Application.Features.Vendors.Commands;
+using Arooba.Application.Features.Vendors.Commands.CreateSubVendor;
 using Arooba.Application.Features.Vendors.Queries;
 using Arooba.Domain.Entities;
 using AutoMapper;

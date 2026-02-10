@@ -16,7 +16,7 @@ public interface IRepository<T> where T : BaseEntity
     /// <param name="id">The entity identifier.</param>
     /// <param name="cancellationToken">A token to observe while waiting for the task to complete.</param>
     /// <returns>The entity if found; otherwise <c>null</c>.</returns>
-    Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves all entities of this type.

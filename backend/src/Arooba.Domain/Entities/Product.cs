@@ -15,13 +15,13 @@ public class Product : AuditableEntity
     public string? Description { get; set; }
     public string? DescriptionAr { get; set; }
     public string Sku { get; set; } = string.Empty;
-    public string CategoryId { get; set; } = string.Empty;
+    public int CategoryId { get; set; } 
     public ProductCategory? Category { get; set; }
-    public Guid ParentVendorId { get; set; }
+    public int ParentVendorId { get; set; }
     public ParentVendor? ParentVendor { get; set; }
-    public Guid? SubVendorId { get; set; }
+    public int? SubVendorId { get; set; }
     public SubVendor? SubVendor { get; set; }
-    public Guid? PickupLocationId { get; set; }
+    public int? PickupLocationId { get; set; }
     public PickupLocation? PickupLocation { get; set; }
     public List<string>? Images { get; set; }
     public ProductStatus Status { get; set; } = ProductStatus.Draft;

@@ -37,7 +37,7 @@ public record RegisterCommand : IRequest<RegisterResultDto>
 public record RegisterResultDto
 {
     /// <summary>The newly created user's ID.</summary>
-    public Guid UserId { get; init; }
+    public int UserId { get; init; }
 
     /// <summary>Whether the verification OTP was sent successfully.</summary>
     public bool OtpSent { get; init; }
@@ -100,7 +100,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, RegisterR
             throw new BadRequestException("Failed to create user account. Please try again.");
         }
 
-        var userId = Guid.NewGuid();
+        var userId = new int();
         var now = _dateTime.UtcNow;
 
         var user = new User
@@ -108,7 +108,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, RegisterR
             Id = userId,
             FullName = request.FullName,
             MobileNumber = request.MobileNumber,
-            Email = request.Email,
+            Email = request.Email ?? string.Empty,
             Role = request.Role,
             IsActive = true,
             CreatedAt = now
@@ -121,7 +121,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, RegisterR
         {
             var customer = new Customer
             {
-                Id = Guid.NewGuid(),
+                Id = new int(),
                 UserId = userId,
                 FullName = request.FullName,
                 MobileNumber = request.MobileNumber,

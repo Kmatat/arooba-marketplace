@@ -12,7 +12,7 @@ namespace Arooba.Application.Features.Finance.Queries;
 public record GetTransactionSplitQuery : IRequest<List<TransactionSplitDto>>
 {
     /// <summary>Gets the order identifier.</summary>
-    public Guid OrderId { get; init; }
+    public int OrderId { get; init; }
 }
 
 /// <summary>
@@ -21,22 +21,22 @@ public record GetTransactionSplitQuery : IRequest<List<TransactionSplitDto>>
 public record TransactionSplitDto
 {
     /// <summary>Gets the split identifier.</summary>
-    public Guid Id { get; init; }
+    public int Id { get; init; }
 
     /// <summary>Gets the order identifier.</summary>
-    public Guid OrderId { get; init; }
+    public int OrderId { get; init; }
 
     /// <summary>Gets the order item identifier.</summary>
-    public Guid OrderItemId { get; init; }
+    public int OrderItemId { get; init; }
 
     /// <summary>Gets the product identifier.</summary>
-    public Guid ProductId { get; init; }
+    public int ProductId { get; init; }
 
     /// <summary>Gets the parent vendor identifier.</summary>
-    public Guid ParentVendorId { get; init; }
+    public int ParentVendorId { get; init; }
 
     /// <summary>Gets the sub-vendor identifier, if applicable.</summary>
-    public Guid? SubVendorId { get; init; }
+    public int? SubVendorId { get; init; }
 
     /// <summary>Gets the gross transaction amount in EGP.</summary>
     public decimal GrossAmount { get; init; }

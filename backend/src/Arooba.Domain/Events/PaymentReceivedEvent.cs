@@ -8,4 +8,4 @@ namespace Arooba.Domain.Events;
 /// </summary>
 /// <param name="OrderId">The unique identifier of the order that was paid for.</param>
 /// <param name="Amount">The payment amount received in EGP.</param>
-public sealed record PaymentReceivedEvent(Guid OrderId, decimal Amount) : IDomainEvent;
+public sealed record PaymentReceivedEvent(int OrderId, decimal Amount) : IDomainEvent;

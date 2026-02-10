@@ -17,7 +17,7 @@ public class AnalyticsController : ApiControllerBase
     /// Records a user activity event.
     /// </summary>
     [HttpPost("track")]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     public async Task<IActionResult> TrackActivity(
         [FromBody] TrackUserActivityCommand command,
         CancellationToken cancellationToken)
@@ -92,7 +92,7 @@ public class AnalyticsController : ApiControllerBase
     public async Task<IActionResult> GetActivityLog(
         [FromQuery] DateTime? dateFrom,
         [FromQuery] DateTime? dateTo,
-        [FromQuery] Guid? userId,
+        [FromQuery] int? userId,
         [FromQuery] UserActivityAction? action,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 50,

@@ -1,6 +1,7 @@
 using Arooba.Application.Common.Models;
 using Arooba.Application.Services;
 using FluentAssertions;
+using Xunit;
 
 namespace Arooba.Application.Tests.Services;
 

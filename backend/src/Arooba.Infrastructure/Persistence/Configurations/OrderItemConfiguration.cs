@@ -31,7 +31,7 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
         builder.HasOne(i => i.Shipment)
             .WithMany(s => s.Items)
             .HasForeignKey(i => i.ShipmentId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.NoAction);
 
         builder.Property(i => i.ProductTitle)
             .IsRequired()

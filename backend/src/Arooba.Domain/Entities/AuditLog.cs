@@ -46,5 +46,5 @@ public class AuditLog : BaseEntity
     public string? UserAgent { get; set; }
 
     /// <summary>Related vendor action request ID (if applicable).</summary>
-    public Guid? VendorActionRequestId { get; set; }
+    public int? VendorActionRequestId { get; set; }
 }

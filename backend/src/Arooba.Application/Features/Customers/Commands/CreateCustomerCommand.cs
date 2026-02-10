@@ -10,7 +10,7 @@ namespace Arooba.Application.Features.Customers.Commands;
 /// Command to register a new customer on the Arooba Marketplace.
 /// Creates both a User account and a Customer profile.
 /// </summary>
-public record CreateCustomerCommand : IRequest<Guid>
+public record CreateCustomerCommand : IRequest<int>
 {
     /// <summary>Gets the customer's full name.</summary>
     public string FullName { get; init; } = default!;
@@ -28,7 +28,7 @@ public record CreateCustomerCommand : IRequest<Guid>
 /// <summary>
 /// Handles customer registration by creating a User and Customer record.
 /// </summary>
-public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerCommand, Guid>
+public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerCommand, int>
 {
     private readonly IApplicationDbContext _context;
     private readonly IDateTimeService _dateTime;
@@ -50,10 +50,10 @@ public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerComman
     /// <param name="request">The create customer command.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>The unique identifier of the newly created customer.</returns>
-    public async Task<Guid> Handle(CreateCustomerCommand request, CancellationToken cancellationToken)
+    public async Task<int> Handle(CreateCustomerCommand request, CancellationToken cancellationToken)
     {
-        var userId = Guid.NewGuid();
-        var customerId = Guid.NewGuid();
+        var userId = new int();
+        var customerId = new int();
         var now = _dateTime.UtcNow;
 
         var user = new User
@@ -61,7 +61,7 @@ public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerComman
             Id = userId,
             FullName = request.FullName,
             MobileNumber = request.MobileNumber,
-            Email = request.Email,
+            Email = request.Email?? string.Empty,
             Role = UserRole.Customer,
             IsActive = true,
             CreatedAt = now

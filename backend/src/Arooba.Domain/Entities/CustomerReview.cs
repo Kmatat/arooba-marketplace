@@ -10,13 +10,13 @@ namespace Arooba.Domain.Entities;
 public class CustomerReview : AuditableEntity
 {
     /// <summary>The customer who wrote the review.</summary>
-    public Guid CustomerId { get; set; }
+    public int CustomerId { get; set; }
 
     /// <summary>The order associated with this review.</summary>
-    public Guid OrderId { get; set; }
+    public int OrderId { get; set; }
 
     /// <summary>The product being reviewed.</summary>
-    public Guid ProductId { get; set; }
+    public int ProductId { get; set; }
 
     /// <summary>Star rating from 1 to 5.</summary>
     public int Rating { get; set; }

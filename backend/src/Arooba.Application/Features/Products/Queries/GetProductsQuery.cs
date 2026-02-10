@@ -21,10 +21,10 @@ public record GetProductsQuery : IRequest<PaginatedList<ProductDto>>
     public int PageSize { get; init; } = 10;
 
     /// <summary>Gets an optional category ID filter.</summary>
-    public Guid? CategoryId { get; init; }
+    public int? CategoryId { get; init; }
 
     /// <summary>Gets an optional parent vendor ID filter.</summary>
-    public Guid? VendorId { get; init; }
+    public int? VendorId { get; init; }
 
     /// <summary>Gets an optional product status filter.</summary>
     public ProductStatus? Status { get; init; }
@@ -45,7 +45,7 @@ public record GetProductsQuery : IRequest<PaginatedList<ProductDto>>
 public record ProductDto
 {
     /// <summary>Gets the product identifier.</summary>
-    public Guid Id { get; init; }
+    public int Id { get; init; }
 
     /// <summary>Gets the product title.</summary>
     public string Title { get; init; } = default!;
@@ -57,10 +57,10 @@ public record ProductDto
     public string Sku { get; init; } = default!;
 
     /// <summary>Gets the category identifier.</summary>
-    public Guid CategoryId { get; init; }
+    public int CategoryId { get; init; }
 
     /// <summary>Gets the parent vendor identifier.</summary>
-    public Guid ParentVendorId { get; init; }
+    public int ParentVendorId { get; init; }
 
     /// <summary>Gets the product status.</summary>
     public ProductStatus Status { get; init; }
@@ -90,7 +90,7 @@ public record ProductDto
 public record ProductCategoryDto
 {
     /// <summary>Gets the category identifier.</summary>
-    public Guid Id { get; init; }
+    public int Id { get; init; }
 
     /// <summary>Gets the category name.</summary>
     public string Name { get; init; } = default!;

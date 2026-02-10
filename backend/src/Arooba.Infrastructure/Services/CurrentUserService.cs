@@ -20,7 +20,7 @@ public class CurrentUserService(IHttpContextAccessor httpContextAccessor)
     /// Gets the unique identifier of the currently authenticated user, or <c>null</c> if unauthenticated.
     /// </summary>
     public string? UserId =>
-        _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+        _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
     /// <summary>
     /// Gets the role of the currently authenticated user as a <see cref="UserRole"/> enum,
@@ -31,7 +31,7 @@ public class CurrentUserService(IHttpContextAccessor httpContextAccessor)
     {
         get
         {
-            var roleString = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Role);
+            var roleString = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Role)?.Value;
             return roleString is not null && Enum.TryParse<UserRole>(roleString, true, out var role)
                 ? role
                 : null;
@@ -44,7 +44,7 @@ public class CurrentUserService(IHttpContextAccessor httpContextAccessor)
     /// Implements <see cref="AppInterfaces.ICurrentUserService.UserRole"/>.
     /// </summary>
     string? AppInterfaces.ICurrentUserService.UserRole =>
-        _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Role);
+        _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Role)?.Value;
 
     /// <summary>
     /// Gets a value indicating whether a user is currently authenticated.

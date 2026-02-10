@@ -5,6 +5,7 @@ using Arooba.Domain.Enums;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Http;
 
 namespace Arooba.Application.Features.Vendors.Commands;
 
@@ -15,7 +16,7 @@ namespace Arooba.Application.Features.Vendors.Commands;
 public record UpdateVendorCommand : IRequest<bool>
 {
     /// <summary>Gets the vendor identifier to update.</summary>
-    public Guid VendorId { get; init; }
+    public int VendorId { get; init; }
 
     /// <summary>Gets the updated vendor status, if changing.</summary>
     public VendorStatus? Status { get; init; }
@@ -33,7 +34,7 @@ public record UpdateVendorCommand : IRequest<bool>
     public string? BusinessName { get; init; }
 
     /// <summary>Gets the updated business name in Arabic.</summary>
-    public string? BusinessNameAr { get; init; }
+    public string? BusinessNameEN { get; init; }
 
     /// <summary>Gets the updated VAT registration status.</summary>
     public bool? IsVatRegistered { get; init; }
@@ -100,9 +101,9 @@ public class UpdateVendorCommandHandler : IRequestHandler<UpdateVendorCommand, b
             vendor.BusinessName = request.BusinessName;
         }
 
-        if (request.BusinessNameAr is not null)
+        if (request.BusinessName is not null)
         {
-            vendor.BusinessNameAr = request.BusinessNameAr;
+            vendor.BusinessName = request.BusinessName;
         }
 
         if (request.IsVatRegistered.HasValue)
@@ -151,9 +152,9 @@ public class UpdateVendorCommandValidator : AbstractValidator<UpdateVendorComman
             .When(v => v.BusinessName is not null)
             .WithMessage("Business name must not exceed 200 characters.");
 
-        RuleFor(v => v.BusinessNameAr)
+        RuleFor(v => v.BusinessName)
             .MaximumLength(200)
-            .When(v => v.BusinessNameAr is not null)
+            .When(v => v.BusinessName is not null)
             .WithMessage("Arabic business name must not exceed 200 characters.");
     }
 }

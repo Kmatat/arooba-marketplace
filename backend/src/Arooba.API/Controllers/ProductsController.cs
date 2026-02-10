@@ -1,9 +1,6 @@
 using Arooba.Application.Common.Models;
-using Arooba.Application.Features.Products.Commands.ChangeProductStatus;
-using Arooba.Application.Features.Products.Commands.CreateProduct;
-using Arooba.Application.Features.Products.Commands.UpdateProduct;
-using Arooba.Application.Features.Products.Queries.GetProductById;
-using Arooba.Application.Features.Products.Queries.GetProducts;
+using Arooba.Application.Features.Products.Commands;
+using Arooba.Application.Features.Products.Queries;
 using Arooba.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -36,8 +33,8 @@ public class ProductsController : ApiControllerBase
     [AllowAnonymous]
     [ProducesResponseType(typeof(PaginatedList<ProductDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetProducts(
-        [FromQuery] Guid? category,
-        [FromQuery] Guid? vendor,
+        [FromQuery] int? category,
+        [FromQuery] int? vendor,
         [FromQuery] ProductStatus? status,
         [FromQuery] decimal? minPrice,
         [FromQuery] decimal? maxPrice,
@@ -53,7 +50,7 @@ public class ProductsController : ApiControllerBase
             Status = status,
             MinPrice = minPrice,
             MaxPrice = maxPrice,
-            Search = search,
+            SearchTerm = search,
             PageNumber = pageNumber,
             PageSize = pageSize
         };
@@ -74,15 +71,15 @@ public class ProductsController : ApiControllerBase
     /// <returns>The product detail including pricing breakdown, vendor info, and logistics data.</returns>
     /// <response code="200">Product found and returned.</response>
     /// <response code="404">Product with the specified identifier was not found.</response>
-    [HttpGet("{id:guid}")]
+    [HttpGet("{id:int}")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(ProductDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetProduct(
-        Guid id,
+        int id,
         CancellationToken cancellationToken)
     {
-        var result = await Sender.Send(new GetProductByIdQuery(id), cancellationToken);
+        var result = await Sender.Send(new GetProductByIdQuery() { ProductId = id }, cancellationToken);
         return Ok(result);
     }
 
@@ -99,7 +96,7 @@ public class ProductsController : ApiControllerBase
     /// <response code="201">Product created successfully.</response>
     /// <response code="400">Validation failed (e.g., missing required fields or invalid pricing).</response>
     [HttpPost]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateProduct(
         [FromBody] CreateProductCommand command,
@@ -120,16 +117,16 @@ public class ProductsController : ApiControllerBase
     /// <response code="204">Product updated successfully.</response>
     /// <response code="400">Validation failed or identifier mismatch.</response>
     /// <response code="404">Product with the specified identifier was not found.</response>
-    [HttpPut("{id:guid}")]
+    [HttpPut("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateProduct(
-        Guid id,
+        int id,
         [FromBody] UpdateProductCommand command,
         CancellationToken cancellationToken)
     {
-        if (id != command.Id)
+        if (id != command.ProductId)
         {
             return BadRequest(new ProblemDetails
             {
@@ -153,16 +150,16 @@ public class ProductsController : ApiControllerBase
     /// <response code="204">Product status updated successfully.</response>
     /// <response code="400">Invalid status transition or validation error.</response>
     /// <response code="404">Product with the specified identifier was not found.</response>
-    [HttpPatch("{id:guid}/status")]
+    [HttpPatch("{id:int}/status")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ChangeProductStatus(
-        Guid id,
-        [FromBody] ChangeProductStatusCommand command,
+        int id,
+        [FromBody] UpdateProductStatusCommand command,
         CancellationToken cancellationToken)
     {
-        if (id != command.Id)
+        if (id != command.ProductId)
         {
             return BadRequest(new ProblemDetails
             {

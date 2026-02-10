@@ -1,9 +1,9 @@
 namespace Arooba.Application.Features.Vendors.Queries;
 
-public record SubVendorDto
+public record SubVendorDto_v2
 {
-    public Guid Id { get; init; }
-    public string BusinessNameAr { get; init; } = string.Empty;
+    public int Id { get; init; }
+    public string BusinessName { get; init; } = string.Empty;
     public string BusinessNameEn { get; init; } = string.Empty;
-    public Guid ParentVendorId { get; init; }
+    public int ParentVendorId { get; init; }
 }

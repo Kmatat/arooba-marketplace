@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Arooba.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2fcbf48607c5e1e6b9ea7c2e2a017afe5a24bd9a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8929bc7098bec85b415e6ea3e74cd72f61c3f4e0")]
 [assembly: System.Reflection.AssemblyProductAttribute("Arooba.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Arooba.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

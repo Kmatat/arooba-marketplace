@@ -9,17 +9,17 @@ namespace Arooba.Domain.Entities;
 public class LedgerEntry : AuditableEntity
 {
     /// <summary>The vendor this entry belongs to.</summary>
-    public Guid VendorId { get; set; }
+    public int VendorId { get; set; }
 
     /// <summary>Alias for VendorId for handler compatibility.</summary>
-    public Guid ParentVendorId
+    public int ParentVendorId
     {
         get => VendorId;
         set => VendorId = value;
     }
 
     /// <summary>The order this entry is associated with (if applicable).</summary>
-    public Guid? OrderId { get; set; }
+    public int? OrderId { get; set; }
 
     /// <summary>A unique transaction identifier.</summary>
     public string TransactionId { get; set; } = string.Empty;

@@ -12,7 +12,7 @@ namespace Arooba.Application.Features.Finance.Queries;
 public record GetVendorWalletQuery : IRequest<VendorWalletDto>
 {
     /// <summary>Gets the vendor identifier.</summary>
-    public Guid VendorId { get; init; }
+    public int VendorId { get; init; }
 }
 
 /// <summary>
@@ -21,10 +21,10 @@ public record GetVendorWalletQuery : IRequest<VendorWalletDto>
 public record VendorWalletDto
 {
     /// <summary>Gets the wallet identifier.</summary>
-    public Guid Id { get; init; }
+    public int Id { get; init; }
 
     /// <summary>Gets the parent vendor identifier.</summary>
-    public Guid ParentVendorId { get; init; }
+    public int ParentVendorId { get; init; }
 
     /// <summary>Gets the vendor's business name.</summary>
     public string VendorBusinessName { get; init; } = default!;

@@ -36,13 +36,13 @@ public record GetVendorsQuery : IRequest<PaginatedList<VendorDto>>
 public record VendorDto
 {
     /// <summary>Gets the vendor identifier.</summary>
-    public Guid Id { get; init; }
+    public int Id { get; init; }
 
     /// <summary>Gets the business name.</summary>
-    public string BusinessName { get; init; } = default!;
+    //public string BusinessName { get; init; } = default!;
 
     /// <summary>Gets the Arabic business name.</summary>
-    public string BusinessNameAr { get; init; } = default!;
+    public string BusinessName { get; init; } = default!;
 
     /// <summary>Gets the vendor type.</summary>
     public VendorType VendorType { get; init; }
@@ -117,10 +117,10 @@ public class GetVendorsQueryHandler : IRequestHandler<GetVendorsQuery, Paginated
         {
             var term = request.SearchTerm.ToLower();
             query = query.Where(v =>
-                v.BusinessName.ToLower().Contains(term) ||
-                v.BusinessNameAr.Contains(request.SearchTerm) ||
+                v.BusinessNameEn.ToLower().Contains(term) ||
+                v.BusinessName.Contains(request.SearchTerm) ||
                 v.Email.ToLower().Contains(term) ||
-                v.MobileNumber.Contains(request.SearchTerm));
+                v.PhoneNumber.Contains(request.SearchTerm));
         }
 
         query = query.OrderByDescending(v => v.CreatedAt);

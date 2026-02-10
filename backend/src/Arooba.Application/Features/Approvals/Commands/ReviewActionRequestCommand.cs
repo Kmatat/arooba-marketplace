@@ -9,7 +9,7 @@ namespace Arooba.Application.Features.Approvals.Commands;
 /// </summary>
 public record ReviewActionRequestCommand : IRequest<Unit>
 {
-    public Guid RequestId { get; init; }
+    public int RequestId { get; init; }
     public ApprovalStatus Decision { get; init; }
     public string? ReviewNotes { get; init; }
 }

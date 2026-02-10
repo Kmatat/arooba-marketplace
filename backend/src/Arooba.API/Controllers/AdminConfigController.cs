@@ -32,7 +32,7 @@ public class AdminConfigController : ApiControllerBase
     /// Changes are audit-logged automatically.
     /// </summary>
     [HttpPost]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpsertConfig(
         [FromBody] UpsertConfigCommand command,

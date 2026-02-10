@@ -23,10 +23,10 @@ public record GetOrdersQuery : IRequest<PaginatedList<OrderDto>>
     public OrderStatus? Status { get; init; }
 
     /// <summary>Gets an optional customer ID filter.</summary>
-    public Guid? CustomerId { get; init; }
+    public int? CustomerId { get; init; }
 
     /// <summary>Gets an optional vendor ID filter (filters by items belonging to this vendor).</summary>
-    public Guid? VendorId { get; init; }
+    public int? VendorId { get; init; }
 
     /// <summary>Gets an optional start date filter (inclusive).</summary>
     public DateTime? DateFrom { get; init; }
@@ -44,13 +44,13 @@ public record GetOrdersQuery : IRequest<PaginatedList<OrderDto>>
 public record OrderDto
 {
     /// <summary>Gets the order identifier.</summary>
-    public Guid Id { get; init; }
+    public int Id { get; init; }
 
     /// <summary>Gets the human-readable order number.</summary>
     public string OrderNumber { get; init; } = default!;
 
     /// <summary>Gets the customer identifier.</summary>
-    public Guid CustomerId { get; init; }
+    public int CustomerId { get; init; }
 
     /// <summary>Gets the order status.</summary>
     public OrderStatus Status { get; init; }
@@ -131,8 +131,8 @@ public class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, PaginatedLi
         if (request.VendorId.HasValue)
         {
             query = query.Where(o =>
-                o.OrderItems != null &&
-                o.OrderItems.Any(oi => oi.ParentVendorId == request.VendorId.Value));
+                o.Items!= null &&
+                o.Items.Any(oi => oi.ParentVendorId == request.VendorId.Value));
         }
 
         if (request.DateFrom.HasValue)
@@ -163,7 +163,7 @@ public class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, PaginatedLi
             SubTotal = o.Subtotal,
             TotalShippingFee = o.TotalDeliveryFee,
             TotalAmount = o.TotalAmount,
-            ItemCount = o.OrderNumber != null ? o.OrderNumber.Sum(oi => oi.Quantity) : 0,
+            //ItemCount = o.OrderNumber != null ? o.OrderNumber.Sum(oi => oi.) : 0,
             ShipmentCount = o.Shipments != null ? o.Shipments.Count : 0,
             //DeliveryCity = o.DeliveryCity.ToString(),
             CreatedAt = o.CreatedAt,

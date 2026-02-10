@@ -9,19 +9,19 @@ namespace Arooba.Domain.Entities;
 public class TransactionSplit : AuditableEntity
 {
     /// <summary>The order this split belongs to.</summary>
-    public Guid OrderId { get; set; }
+    public int OrderId { get; set; }
 
     /// <summary>The order item this split is for.</summary>
-    public Guid OrderItemId { get; set; }
+    public int OrderItemId { get; set; }
 
     /// <summary>The product being purchased.</summary>
-    public Guid ProductId { get; set; }
+    public int ProductId { get; set; }
 
     /// <summary>The parent vendor who will receive payment.</summary>
-    public Guid ParentVendorId { get; set; }
+    public int ParentVendorId { get; set; }
 
     /// <summary>The sub-vendor who created the product (optional).</summary>
-    public Guid? SubVendorId { get; set; }
+    public int? SubVendorId { get; set; }
 
     /// <summary>Gross amount of the transaction (total price).</summary>
     public decimal GrossAmount { get; set; }

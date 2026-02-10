@@ -6,6 +6,7 @@ using Arooba.Application.Common.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Http;
 
 namespace Arooba.Infrastructure.Services;
 

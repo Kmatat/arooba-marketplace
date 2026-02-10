@@ -23,7 +23,7 @@ public class ApprovalsController : ApiControllerBase
     public async Task<IActionResult> GetRequests(
         [FromQuery] ApprovalStatus? status,
         [FromQuery] VendorActionType? actionType,
-        [FromQuery] Guid? vendorId,
+        [FromQuery] int? vendorId,
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 20,
         CancellationToken cancellationToken = default)
@@ -43,7 +43,7 @@ public class ApprovalsController : ApiControllerBase
     /// Creates a new vendor action request requiring admin approval.
     /// </summary>
     [HttpPost]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateRequest(
         [FromBody] CreateActionRequestCommand command,
@@ -57,11 +57,11 @@ public class ApprovalsController : ApiControllerBase
     /// Reviews (approves or rejects) a pending vendor action request.
     /// Rejection requires review notes.
     /// </summary>
-    [HttpPut("{id:guid}/review")]
+    [HttpPut("{id:int}/review")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ReviewRequest(
-        Guid id,
+        int id,
         [FromBody] ReviewActionRequestCommand command,
         CancellationToken cancellationToken)
     {

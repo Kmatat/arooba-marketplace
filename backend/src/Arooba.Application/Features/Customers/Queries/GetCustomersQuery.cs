@@ -28,7 +28,7 @@ public record GetCustomersQuery : IRequest<PaginatedList<CustomerDto>>
 public record CustomerDto
 {
     /// <summary>Gets the customer identifier.</summary>
-    public Guid Id { get; init; }
+    public int Id { get; init; }
 
     /// <summary>Gets the customer's full name.</summary>
     public string FullName { get; init; } = default!;

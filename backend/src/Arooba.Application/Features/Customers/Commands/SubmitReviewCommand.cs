@@ -11,16 +11,16 @@ namespace Arooba.Application.Features.Customers.Commands;
 /// <summary>
 /// Command to submit a product review from a customer.
 /// </summary>
-public record SubmitReviewCommand : IRequest<Guid>
+public record SubmitReviewCommand : IRequest<int>
 {
     /// <summary>Gets the customer identifier.</summary>
-    public Guid CustomerId { get; init; }
+    public int CustomerId { get; init; }
 
     /// <summary>Gets the order identifier.</summary>
-    public Guid OrderId { get; init; }
+    public int OrderId { get; init; }
 
     /// <summary>Gets the product identifier.</summary>
-    public Guid ProductId { get; init; }
+    public int ProductId { get; init; }
 
     /// <summary>Gets the star rating (1-5).</summary>
     public int Rating { get; init; }
@@ -32,7 +32,7 @@ public record SubmitReviewCommand : IRequest<Guid>
 /// <summary>
 /// Handles submission of a customer review.
 /// </summary>
-public class SubmitReviewCommandHandler : IRequestHandler<SubmitReviewCommand, Guid>
+public class SubmitReviewCommandHandler : IRequestHandler<SubmitReviewCommand, int>
 {
     private readonly IApplicationDbContext _context;
     private readonly IDateTimeService _dateTime;
@@ -43,7 +43,7 @@ public class SubmitReviewCommandHandler : IRequestHandler<SubmitReviewCommand, G
         _dateTime = dateTime;
     }
 
-    public async Task<Guid> Handle(SubmitReviewCommand request, CancellationToken cancellationToken)
+    public async Task<int> Handle(SubmitReviewCommand request, CancellationToken cancellationToken)
     {
         // Verify customer exists
         var customer = await _context.Customers
@@ -65,7 +65,7 @@ public class SubmitReviewCommandHandler : IRequestHandler<SubmitReviewCommand, G
         if (existingReview)
             throw new BadRequestException("A review for this product on this order already exists.");
 
-        var reviewId = Guid.NewGuid();
+        var reviewId = new int();
         var review = new CustomerReview
         {
             Id = reviewId,

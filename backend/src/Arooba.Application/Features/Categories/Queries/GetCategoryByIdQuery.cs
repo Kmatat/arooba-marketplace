@@ -9,14 +9,14 @@ namespace Arooba.Application.Features.Categories.Queries.GetCategoryById;
 /// <summary>
 /// Query to retrieve a single product category by its identifier.
 /// </summary>
-public record GetCategoryByIdQuery(string Id) : IRequest<CategoryDetailDto>;
+public record GetCategoryByIdQuery(int Id) : IRequest<CategoryDetailDto>;
 
 /// <summary>
 /// DTO for a single category with full detail.
 /// </summary>
 public record CategoryDetailDto
 {
-    public string Id { get; init; } = string.Empty;
+    public int Id { get; init; } 
     public string NameEn { get; init; } = string.Empty;
     public string NameAr { get; init; } = string.Empty;
     public string? Icon { get; init; }
@@ -52,7 +52,7 @@ public class GetCategoryByIdQueryHandler : IRequestHandler<GetCategoryByIdQuery,
             {
                 Id = c.Id,
                 NameEn = c.NameEn,
-                NameAr = c.NameAr,
+                NameAr = c.Name,
                 Icon = c.Icon,
                 MinUpliftRate = c.MinUpliftRate,
                 MaxUpliftRate = c.MaxUpliftRate,

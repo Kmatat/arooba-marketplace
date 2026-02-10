@@ -14,7 +14,7 @@ public record GetRateCardsQuery : IRequest<IReadOnlyList<RateCardDto>>;
 /// </summary>
 public record RateCardDto
 {
-    public Guid Id { get; init; }
+    public int Id { get; init; }
     public string FromZoneId { get; init; } = string.Empty;
     public string ToZoneId { get; init; } = string.Empty;
     public decimal BasePrice { get; init; }

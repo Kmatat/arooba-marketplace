@@ -10,7 +10,7 @@ namespace Arooba.Domain.Entities;
 public class CustomerLoginHistory : BaseEntity
 {
     /// <summary>The customer who attempted to log in.</summary>
-    public Guid CustomerId { get; set; }
+    public int CustomerId { get; set; }
 
     /// <summary>Whether the login was successful, failed, or blocked.</summary>
     public LoginStatus Status { get; set; }

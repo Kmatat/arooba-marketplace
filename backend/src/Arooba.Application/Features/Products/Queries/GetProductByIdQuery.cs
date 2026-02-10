@@ -14,7 +14,7 @@ namespace Arooba.Application.Features.Products.Queries;
 public record GetProductByIdQuery : IRequest<ProductDetailDto>
 {
     /// <summary>Gets the product identifier.</summary>
-    public Guid ProductId { get; init; }
+    public int ProductId { get; init; }
 }
 
 /// <summary>
@@ -23,19 +23,19 @@ public record GetProductByIdQuery : IRequest<ProductDetailDto>
 public record ProductDetailDto
 {
     /// <summary>Gets the product identifier.</summary>
-    public Guid Id { get; init; }
+    public int Id { get; init; }
 
     /// <summary>Gets the parent vendor identifier.</summary>
-    public Guid ParentVendorId { get; init; }
+    public int ParentVendorId { get; init; }
 
     /// <summary>Gets the parent vendor business name.</summary>
     public string VendorBusinessName { get; init; } = default!;
 
     /// <summary>Gets the sub-vendor identifier, if applicable.</summary>
-    public Guid? SubVendorId { get; init; }
+    public int? SubVendorId { get; init; }
 
     /// <summary>Gets the category identifier.</summary>
-    public Guid CategoryId { get; init; }
+    public int CategoryId { get; init; }
 
     /// <summary>Gets the category name.</summary>
     public string CategoryName { get; init; } = default!;
@@ -118,7 +118,7 @@ public record ProductDetailDto
     public bool IsLocalOnly { get; init; }
 
     /// <summary>Gets the pickup location identifier.</summary>
-    public Guid PickupLocationId { get; init; }
+    public int PickupLocationId { get; init; }
 
     /// <summary>Gets the creation date.</summary>
     public DateTime CreatedAt { get; init; }
@@ -200,7 +200,7 @@ public class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQuery, P
             WidthCm = product.WidthCm,
             HeightCm = product.HeightCm,
             IsLocalOnly = product.IsLocalOnly,
-            PickupLocationId = product.PickupLocationId,
+            PickupLocationId = product.PickupLocationId ?? 0,
             CreatedAt = product.CreatedAt,
             UpdatedAt = product.UpdatedAt
         };

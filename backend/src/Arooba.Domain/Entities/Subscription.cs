@@ -6,7 +6,7 @@ namespace Arooba.Domain.Entities;
 /// <summary>Represents a Subscription in the Arooba Marketplace domain.</summary>
 public class Subscription : AuditableEntity
 {
-    public Guid CustomerId { get; set; }
+    public int CustomerId { get; set; }
     public string Name { get; set; } = string.Empty;
     public SubscriptionFrequency Frequency { get; set; }
     public string? ItemsJson { get; set; }

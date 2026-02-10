@@ -7,4 +7,4 @@ namespace Arooba.Domain.Events;
 /// Handlers may trigger welcome communications, admin review workflows, or analytics.
 /// </summary>
 /// <param name="VendorId">The unique identifier of the newly registered vendor.</param>
-public sealed record VendorRegisteredEvent(Guid VendorId) : IDomainEvent;
+public sealed record VendorRegisteredEvent(int VendorId) : IDomainEvent;

@@ -10,7 +10,7 @@ namespace Arooba.Domain.Entities;
 public class Order : AuditableEntity
 {
     public string OrderNumber { get; set; } = string.Empty;
-    public Guid CustomerId { get; set; }
+    public int CustomerId { get; set; }
     public string CustomerName { get; set; } = string.Empty;
     public OrderStatus Status { get; set; } = OrderStatus.Pending;
     public decimal Subtotal { get; set; }
@@ -23,7 +23,7 @@ public class Order : AuditableEntity
     public string? DeliveryCity { get; set; }
     public string? DeliveryZoneId { get; set; }
     public List<OrderItem> Items { get; set; } = [];
-
+    public DateTime DeliveredAt { get; set; }
     /// <summary>Navigation property to the customer who placed this order.</summary>
     public Customer? Customer { get; set; }
 

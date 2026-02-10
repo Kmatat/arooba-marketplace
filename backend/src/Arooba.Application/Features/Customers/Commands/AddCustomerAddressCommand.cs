@@ -10,49 +10,31 @@ namespace Arooba.Application.Features.Customers.Commands;
 /// <summary>
 /// Command to add a new delivery address to a customer's profile.
 /// </summary>
-public record AddCustomerAddressCommand : IRequest<Guid>
+public record AddCustomerAddressCommand : IRequest<int>
 {
     /// <summary>Gets the customer identifier.</summary>
-    public Guid CustomerId { get; init; }
+    public int CustomerId { get; init; }
 
     /// <summary>Gets the address label (e.g., "Home", "Office").</summary>
     public string Label { get; init; } = default!;
 
-    /// <summary>Gets the street address.</summary>
-    public string StreetAddress { get; init; } = default!;
-
-    /// <summary>Gets the apartment or building number.</summary>
-    public string? ApartmentNumber { get; init; }
-
-    /// <summary>Gets the floor number.</summary>
-    public string? Floor { get; init; }
-
-    /// <summary>Gets the district or neighbourhood.</summary>
-    public string District { get; init; } = default!;
+    /// <summary>Gets the full address.</summary>
+    public string FullAddress { get; init; } = default!;
 
     /// <summary>Gets the city name.</summary>
     public string City { get; init; } = default!;
 
-    /// <summary>Gets the Egyptian governorate.</summary>
-    public string Governorate { get; init; } = default!;
-
-    /// <summary>Gets the postal code.</summary>
-    public string? PostalCode { get; init; }
-
     /// <summary>Gets the shipping zone identifier for this address.</summary>
-    public Guid ShippingZoneId { get; init; }
+    public string ZoneId { get; init; } = default!;
 
     /// <summary>Gets whether this should be set as the default delivery address.</summary>
     public bool IsDefault { get; init; }
-
-    /// <summary>Gets additional delivery notes.</summary>
-    public string? DeliveryNotes { get; init; }
 }
 
 /// <summary>
 /// Handles adding a new delivery address to a customer's profile.
 /// </summary>
-public class AddCustomerAddressCommandHandler : IRequestHandler<AddCustomerAddressCommand, Guid>
+public class AddCustomerAddressCommandHandler : IRequestHandler<AddCustomerAddressCommand, int>
 {
     private readonly IApplicationDbContext _context;
     private readonly IDateTimeService _dateTime;
@@ -76,7 +58,7 @@ public class AddCustomerAddressCommandHandler : IRequestHandler<AddCustomerAddre
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>The unique identifier of the newly created address.</returns>
     /// <exception cref="NotFoundException">Thrown when the customer is not found.</exception>
-    public async Task<Guid> Handle(AddCustomerAddressCommand request, CancellationToken cancellationToken)
+    public async Task<int> Handle(AddCustomerAddressCommand request, CancellationToken cancellationToken)
     {
         var customer = await _context.Customers
             .FirstOrDefaultAsync(c => c.Id == request.CustomerId, cancellationToken);
@@ -99,30 +81,21 @@ public class AddCustomerAddressCommandHandler : IRequestHandler<AddCustomerAddre
             }
         }
 
-        var addressId = Guid.NewGuid();
-
         var address = new CustomerAddress
         {
-            Id = addressId,
             CustomerId = request.CustomerId,
             Label = request.Label,
-            StreetAddress = request.StreetAddress,
-            ApartmentNumber = request.ApartmentNumber,
-            Floor = request.Floor,
-            District = request.District,
+            FullAddress = request.FullAddress,
             City = request.City,
-            Governorate = request.Governorate,
-            PostalCode = request.PostalCode,
-            ShippingZoneId = request.ShippingZoneId,
+            ZoneId = request.ZoneId,
             IsDefault = request.IsDefault,
-            DeliveryNotes = request.DeliveryNotes,
             CreatedAt = _dateTime.UtcNow
         };
 
         _context.CustomerAddresses.Add(address);
         await _context.SaveChangesAsync(cancellationToken);
 
-        return addressId;
+        return address.Id;
     }
 }
 
@@ -143,23 +116,16 @@ public class AddCustomerAddressCommandValidator : AbstractValidator<AddCustomerA
             .NotEmpty().WithMessage("Address label is required.")
             .MaximumLength(50).WithMessage("Address label must not exceed 50 characters.");
 
-        RuleFor(a => a.StreetAddress)
-            .NotEmpty().WithMessage("Street address is required.")
-            .MaximumLength(300).WithMessage("Street address must not exceed 300 characters.");
-
-        RuleFor(a => a.District)
-            .NotEmpty().WithMessage("District is required.")
-            .MaximumLength(100).WithMessage("District must not exceed 100 characters.");
+        RuleFor(a => a.FullAddress)
+            .NotEmpty().WithMessage("Full address is required.")
+            .MaximumLength(300).WithMessage("Full address must not exceed 300 characters.");
 
         RuleFor(a => a.City)
             .NotEmpty().WithMessage("City is required.")
             .MaximumLength(100).WithMessage("City must not exceed 100 characters.");
 
-        RuleFor(a => a.Governorate)
-            .NotEmpty().WithMessage("Governorate is required.")
-            .MaximumLength(100).WithMessage("Governorate must not exceed 100 characters.");
-
-        RuleFor(a => a.ShippingZoneId)
-            .NotEmpty().WithMessage("Shipping zone ID is required.");
+        RuleFor(a => a.ZoneId)
+            .NotEmpty().WithMessage("Zone ID is required.")
+            .MaximumLength(50).WithMessage("Zone ID must not exceed 50 characters.");
     }
 }

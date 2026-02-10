@@ -15,7 +15,7 @@ namespace Arooba.Application.Features.Orders.Queries;
 public record GetOrderByIdQuery : IRequest<OrderDetailDto>
 {
     /// <summary>Gets the order identifier.</summary>
-    public Guid OrderId { get; init; }
+    public int OrderId { get; init; }
 }
 
 /// <summary>
@@ -24,10 +24,10 @@ public record GetOrderByIdQuery : IRequest<OrderDetailDto>
 public record OrderItemDto
 {
     /// <summary>Gets the order item identifier.</summary>
-    public Guid Id { get; init; }
+    public int Id { get; init; }
 
     /// <summary>Gets the product identifier.</summary>
-    public Guid ProductId { get; init; }
+    public int ProductId { get; init; }
 
     /// <summary>Gets the product title at time of order.</summary>
     public string ProductTitle { get; init; } = default!;
@@ -60,13 +60,13 @@ public record OrderItemDto
     public decimal WithholdingTaxAmount { get; init; }
 
     /// <summary>Gets the parent vendor identifier.</summary>
-    public Guid ParentVendorId { get; init; }
+    public int ParentVendorId { get; init; }
 
     /// <summary>Gets the sub-vendor identifier, if applicable.</summary>
-    public Guid? SubVendorId { get; init; }
+    public int? SubVendorId { get; init; }
 
     /// <summary>Gets the shipment identifier this item belongs to.</summary>
-    public Guid? ShipmentId { get; init; }
+    public int? ShipmentId { get; init; }
 }
 
 /// <summary>
@@ -75,13 +75,13 @@ public record OrderItemDto
 public record ShipmentDto
 {
     /// <summary>Gets the shipment identifier.</summary>
-    public Guid Id { get; init; }
+    public int Id { get; init; }
 
     /// <summary>Gets the pickup location identifier.</summary>
-    public Guid PickupLocationId { get; init; }
+    public int PickupLocationId { get; init; }
 
     /// <summary>Gets the shipment status.</summary>
-    public OrderStatus Status { get; init; }
+    public ShipmentStatus Status { get; init; }
 
     /// <summary>Gets the tracking number.</summary>
     public string TrackingNumber { get; init; } = default!;
@@ -102,16 +102,16 @@ public record ShipmentDto
 /// <summary>
 /// Detailed DTO for a single order including items, shipments, and full financial breakdown.
 /// </summary>
-public record OrderDetailDto_v2
+public record OrderDetailDto
 {
     /// <summary>Gets the order identifier.</summary>
-    public Guid Id { get; init; }
+    public int Id { get; init; }
 
     /// <summary>Gets the human-readable order number.</summary>
     public string OrderNumber { get; init; } = default!;
 
     /// <summary>Gets the customer identifier.</summary>
-    public Guid CustomerId { get; init; }
+    public int CustomerId { get; init; }
 
     /// <summary>Gets the customer name.</summary>
     public string CustomerName { get; init; } = default!;
@@ -129,7 +129,7 @@ public record OrderDetailDto_v2
     public string DeliveryCity { get; init; } = default!;
 
     /// <summary>Gets the delivery zone identifier.</summary>
-    public Guid DeliveryZoneId { get; init; }
+    public int DeliveryZoneId { get; init; }
 
     /// <summary>Gets the order subtotal in EGP.</summary>
     public decimal SubTotal { get; init; }
@@ -191,7 +191,7 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>A detailed order DTO.</returns>
     /// <exception cref="NotFoundException">Thrown when the order is not found.</exception>
-    public async Task<OrderDetailDto_v2> Handle(
+    public async Task<OrderDetailDto> Handle(
         GetOrderByIdQuery request,
         CancellationToken cancellationToken)
     {
@@ -207,7 +207,7 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order
             throw new NotFoundException(nameof(Order), request.OrderId);
         }
 
-        var items = order.OrderItems?.Select(oi => new OrderItemDto
+        var items = order.Items?.Select(oi => new OrderItemDto
         {
             Id = oi.Id,
             ProductId = oi.ProductId,
@@ -231,11 +231,11 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order
             Id = s.Id,
             PickupLocationId = s.PickupLocationId,
             Status = s.Status,
-            TrackingNumber = s.TrackingNumber,
+            TrackingNumber = s.TrackingNumber ?? string.Empty,
             TotalWeight = s.TotalWeight,
             ItemCount = s.ItemCount,
             CreatedAt = s.CreatedAt,
-            DeliveredAt = s.DeliveredAt
+            DeliveredAt = null
         }).ToList() ?? new List<ShipmentDto>();
 
         return new OrderDetailDto
@@ -246,11 +246,11 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order
             CustomerName = order.Customer?.FullName ?? string.Empty,
             Status = order.Status,
             PaymentMethod = order.PaymentMethod,
-            DeliveryAddress = order.DeliveryAddress,
-            DeliveryCity = order.DeliveryCity,
-            DeliveryZoneId = order.DeliveryZoneId,
-            SubTotal = order.SubTotal,
-            TotalShippingFee = order.TotalShippingFee,
+            DeliveryAddress = order.DeliveryAddress ?? string.Empty,
+            DeliveryCity = order.DeliveryCity ?? string.Empty,
+            //DeliveryZoneId = order.DeliveryZoneId ,
+            SubTotal = order.Subtotal,
+            TotalShippingFee = order.TotalDeliveryFee,
             TotalAmount = order.TotalAmount,
             TotalCommission = items.Sum(i => i.CommissionAmount),
             TotalVat = items.Sum(i => i.VatAmount),
@@ -259,7 +259,12 @@ public class GetOrderByIdQueryHandler : IRequestHandler<GetOrderByIdQuery, Order
             Shipments = shipments,
             CreatedAt = order.CreatedAt,
             UpdatedAt = order.UpdatedAt,
-            DeliveredAt = order.DeliveredAt
+            //DeliveredAt = order.DeliveredAt
         };
+    }
+
+    Task<OrderDetailDto> IRequestHandler<GetOrderByIdQuery, OrderDetailDto>.Handle(GetOrderByIdQuery request, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
     }
 }

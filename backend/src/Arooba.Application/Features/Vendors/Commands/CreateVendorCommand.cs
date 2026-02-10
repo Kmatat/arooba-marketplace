@@ -6,9 +6,9 @@ namespace Arooba.Application.Features.Vendors.Commands;
 /// <summary>
 /// Command to register a new parent vendor on the marketplace.
 /// </summary>
-public record CreateVendorCommand : IRequest<Guid>
+public record CreateVendorCommand : IRequest<int>
 {
-    public string BusinessNameAr { get; init; } = string.Empty;
+    public string BusinessName { get; init; } = string.Empty;
     public string BusinessNameEn { get; init; } = string.Empty;
     public string PhoneNumber { get; init; } = string.Empty;
     public string Email { get; init; } = string.Empty;

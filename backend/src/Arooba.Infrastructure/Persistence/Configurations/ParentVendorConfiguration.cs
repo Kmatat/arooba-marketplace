@@ -7,7 +7,7 @@ namespace Arooba.Infrastructure.Persistence.Configurations;
 
 /// <summary>
 /// EF Core configuration for the <see cref="ParentVendor"/> entity.
-/// Maps to the "ParentVendors" table with FK to Users and optional FK to Cooperatives.
+/// Maps to the "ParentVendors" table with FK to Users.
 /// Financial fields use decimal(18,2) precision. Indexed on Status.
 /// </summary>
 public class ParentVendorConfiguration : IEntityTypeConfiguration<ParentVendor>
@@ -19,26 +19,15 @@ public class ParentVendorConfiguration : IEntityTypeConfiguration<ParentVendor>
 
         builder.HasKey(v => v.Id);
 
-        builder.HasOne(v => v.User)
-            .WithMany()
-            .HasForeignKey(v => v.UserId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasOne(v => v.Cooperative)
-            .WithMany(c => c.Vendors)
-            .HasForeignKey(v => v.CooperativeId)
-            .IsRequired(false)
-            .OnDelete(DeleteBehavior.SetNull);
-
         builder.Property(v => v.BusinessName)
             .IsRequired()
             .HasMaxLength(300);
 
-        builder.Property(v => v.BusinessNameAr)
+        builder.Property(v => v.BusinessNameEn)
             .IsRequired()
             .HasMaxLength(300);
 
-        builder.Property(v => v.Type)
+        builder.Property(v => v.VendorType)
             .IsRequired()
             .HasConversion<string>()
             .HasMaxLength(30);
@@ -50,14 +39,31 @@ public class ParentVendorConfiguration : IEntityTypeConfiguration<ParentVendor>
 
         builder.HasIndex(v => v.Status);
 
-        builder.Property(v => v.CommercialRegNumber)
+        builder.Property(v => v.PhoneNumber)
+            .IsRequired()
+            .HasMaxLength(20);
+
+        builder.Property(v => v.Email)
+            .IsRequired()
+            .HasMaxLength(256);
+
+        builder.Property(v => v.NationalId)
+            .IsRequired()
+            .HasMaxLength(50);
+
+        builder.Property(v => v.City)
+            .IsRequired()
             .HasMaxLength(100);
 
-        builder.Property(v => v.TaxId)
+        builder.Property(v => v.GovernorateId)
+            .IsRequired()
             .HasMaxLength(100);
 
-        builder.Property(v => v.DefaultCommissionRate)
-            .HasPrecision(18, 2);
+        builder.Property(v => v.TaxRegistrationNumber)
+            .HasMaxLength(100);
+
+        builder.Property(v => v.CommissionRate)
+            .HasPrecision(5, 4);
 
         builder.Property(v => v.BankName)
             .HasMaxLength(200);
@@ -65,11 +71,12 @@ public class ParentVendorConfiguration : IEntityTypeConfiguration<ParentVendor>
         builder.Property(v => v.BankAccountNumber)
             .HasMaxLength(100);
 
-        builder.Property(v => v.AverageRating)
-            .HasPrecision(3, 2);
+        builder.Property(v => v.SubVendorUpliftType)
+            .HasConversion<string>()
+            .HasMaxLength(30);
 
-        builder.Property(v => v.TotalRevenue)
-            .HasPrecision(18, 2);
+        builder.Property(v => v.SubVendorUpliftValue)
+            .HasPrecision(5, 4);
 
         builder.Property(v => v.CreatedBy)
             .HasMaxLength(100);

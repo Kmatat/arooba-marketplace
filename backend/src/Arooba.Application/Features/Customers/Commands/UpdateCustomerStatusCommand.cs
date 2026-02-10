@@ -13,7 +13,7 @@ namespace Arooba.Application.Features.Customers.Commands;
 public record UpdateCustomerStatusCommand : IRequest<bool>
 {
     /// <summary>Gets the customer identifier.</summary>
-    public Guid CustomerId { get; init; }
+    public int CustomerId { get; init; }
 
     /// <summary>Gets whether the customer account should be active.</summary>
     public bool IsActive { get; init; }

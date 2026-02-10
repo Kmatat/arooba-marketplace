@@ -8,10 +8,10 @@ namespace Arooba.Domain.Entities;
 public class VendorWallet : AuditableEntity
 {
     /// <summary>The vendor this wallet belongs to.</summary>
-    public Guid VendorId { get; set; }
+    public int VendorId { get; set; }
 
     /// <summary>Alias for VendorId for handler compatibility.</summary>
-    public Guid ParentVendorId
+    public int ParentVendorId
     {
         get => VendorId;
         set => VendorId = value;

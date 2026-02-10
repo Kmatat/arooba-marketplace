@@ -13,7 +13,7 @@ namespace Arooba.Application.Features.Customers.Commands;
 public record UpdateCustomerCommand : IRequest<bool>
 {
     /// <summary>Gets the customer identifier.</summary>
-    public Guid CustomerId { get; init; }
+    public int CustomerId { get; init; }
 
     /// <summary>Gets the updated full name.</summary>
     public string? FullName { get; init; }

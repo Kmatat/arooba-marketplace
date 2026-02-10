@@ -1,0 +1,878 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Arooba.API</name>
+    </assembly>
+    <members>
+        <member name="T:Arooba.API.Controllers.AdminConfigController">
+            <summary>
+            Manages dynamic platform configurations. Only accessible by admin roles.
+            Allows runtime modification of pricing rules, SLA thresholds, and business parameters
+            without code deployment.
+            </summary>
+        </member>
+        <member name="M:Arooba.API.Controllers.AdminConfigController.GetConfigs(System.Nullable{Arooba.Domain.Enums.ConfigCategory},System.Threading.CancellationToken)">
+            <summary>
+            Retrieves all platform configurations, optionally filtered by category.
+            </summary>
+        </member>
+        <member name="M:Arooba.API.Controllers.AdminConfigController.UpsertConfig(Arooba.Application.Features.AdminConfig.Commands.UpsertConfigCommand,System.Threading.CancellationToken)">
+            <summary>
+            Creates or updates a platform configuration entry.
+            Changes are audit-logged automatically.
+            </summary>
+        </member>
+        <member name="T:Arooba.API.Controllers.AnalyticsController">
+            <summary>
+            Provides user analytics, conversion funnel data, product performance metrics,
+            and activity logs for the management analytics dashboard.
+            </summary>
+        </member>
+        <member name="M:Arooba.API.Controllers.AnalyticsController.TrackActivity(Arooba.Application.Features.Analytics.Commands.TrackUserActivityCommand,System.Threading.CancellationToken)">
+            <summary>
+            Records a user activity event.
+            </summary>
+        </member>
+        <member name="M:Arooba.API.Controllers.AnalyticsController.GetSummary(System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Threading.CancellationToken)">
+            <summary>
+            Retrieves the analytics summary KPIs (sessions, users, views, conversions, searches).
+            </summary>
+        </member>
+        <member name="M:Arooba.API.Controllers.AnalyticsController.GetConversionFunnel(System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Threading.CancellationToken)">
+            <summary>
+            Retrieves conversion funnel data (views -> cart -> checkout -> purchase).
+            </summary>
+        </member>
+        <member name="M:Arooba.API.Controllers.AnalyticsController.GetProductAnalytics(System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Int32,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves per-product analytics (views, cart adds, purchases, conversion rates).
+            </summary>
+        </member>
+        <member name="M:Arooba.API.Controllers.AnalyticsController.GetActivityLog(System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Nullable{System.Int32},System.Nullable{Arooba.Domain.Enums.UserActivityAction},System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves a paginated log of all user activity events.
+            </summary>
+        </member>
+        <member name="T:Arooba.API.Controllers.ApiControllerBase">
+            <summary>
+            Abstract base controller for all Arooba API controllers.
+            Provides common configuration including route template, API behavior,
+            and access to the MediatR <see cref="T:MediatR.ISender"/> for dispatching commands and queries.
+            </summary>
+        </member>
+        <member name="P:Arooba.API.Controllers.ApiControllerBase.Sender">
+            <summary>
+            Gets the MediatR sender resolved from the request's service scope.
+            Used by derived controllers to dispatch commands and queries.
+            </summary>
+        </member>
+        <member name="T:Arooba.API.Controllers.ApprovalsController">
+            <summary>
+            Manages the vendor action approval workflow.
+            Vendors submit action requests; admins review, approve, or reject them.
+            All decisions are audit-logged for compliance.
+            </summary>
+        </member>
+        <member name="M:Arooba.API.Controllers.ApprovalsController.GetRequests(System.Nullable{Arooba.Domain.Enums.ApprovalStatus},System.Nullable{Arooba.Domain.Enums.VendorActionType},System.Nullable{System.Int32},System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves vendor action requests with filtering and pagination.
+            </summary>
+        </member>
+        <member name="M:Arooba.API.Controllers.ApprovalsController.CreateRequest(Arooba.Application.Features.Approvals.Commands.CreateActionRequestCommand,System.Threading.CancellationToken)">
+            <summary>
+            Creates a new vendor action request requiring admin approval.
+            </summary>
+        </member>
+        <member name="M:Arooba.API.Controllers.ApprovalsController.ReviewRequest(System.Int32,Arooba.Application.Features.Approvals.Commands.ReviewActionRequestCommand,System.Threading.CancellationToken)">
+            <summary>
+            Reviews (approves or rejects) a pending vendor action request.
+            Rejection requires review notes.
+            </summary>
+        </member>
+        <member name="T:Arooba.API.Controllers.AuditLogsController">
+            <summary>
+            Provides read-only access to the platform audit trail.
+            Records all significant actions including vendor operations, admin decisions,
+            configuration changes, and status transitions.
+            </summary>
+        </member>
+        <member name="M:Arooba.API.Controllers.AuditLogsController.GetAuditLogs(System.String,System.Nullable{Arooba.Domain.Enums.AuditAction},System.String,System.String,System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves audit log entries with filtering by user, action type, entity, and date range.
+            </summary>
+        </member>
+        <member name="T:Arooba.API.Controllers.AuthController">
+            <summary>
+            Handles authentication operations including user registration, OTP verification,
+            social login (Google, Apple, Facebook), and token refresh.
+            </summary>
+        </member>
+        <member name="M:Arooba.API.Controllers.AuthController.Register(Arooba.Application.Features.Auth.Commands.RegisterCommand,System.Threading.CancellationToken)">
+            <summary>
+            Registers a new user account. An OTP is automatically sent to the provided mobile number.
+            </summary>
+            <param name="command">The registration details including name, mobile number, email, and role.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>The user ID and OTP delivery status.</returns>
+            <response code="201">User registered successfully. OTP sent for mobile verification.</response>
+            <response code="400">Validation failed (e.g., duplicate mobile number).</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.AuthController.SendOtp(Arooba.Application.Features.Auth.Commands.SendOtpCommand,System.Threading.CancellationToken)">
+            <summary>
+            Sends a one-time password to the user's mobile number via ADVANSYS SMS gateway.
+            Used for login and mobile number verification.
+            </summary>
+            <param name="command">The mobile number to send the OTP to.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>OTP delivery status.</returns>
+            <response code="200">OTP sent successfully.</response>
+            <response code="400">Invalid mobile number or rate-limited.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.AuthController.VerifyOtp(Arooba.Application.Features.Auth.Commands.VerifyOtpCommand,System.Threading.CancellationToken)">
+            <summary>
+            Verifies an OTP code and authenticates the user, returning a JWT bearer token.
+            </summary>
+            <param name="command">The mobile number and OTP code to verify.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>A JWT token with user claims and expiration details.</returns>
+            <response code="200">OTP verified; JWT token returned.</response>
+            <response code="400">Invalid or expired OTP.</response>
+            <response code="404">User not found.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.AuthController.Login(Arooba.Application.Features.Auth.Commands.LoginCommand,System.Threading.CancellationToken)">
+            <summary>
+            Authenticates a user using their mobile number and OTP (legacy login endpoint).
+            Prefer using send-otp + verify-otp endpoints for new integrations.
+            </summary>
+            <param name="command">The login credentials (mobile number and OTP).</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>A JWT token with user claims and expiration details.</returns>
+            <response code="200">Login successful; token returned.</response>
+            <response code="400">Invalid credentials.</response>
+            <response code="404">User not found.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.AuthController.SocialLogin(Arooba.Application.Features.Auth.Commands.SocialLoginCommand,System.Threading.CancellationToken)">
+            <summary>
+            Authenticates or registers a user via social login (Google, Apple, Facebook).
+            If the user is new, a mobile number must be provided and will need OTP verification.
+            </summary>
+            <param name="command">The social provider, token, and optional mobile number.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>JWT token and mobile verification status.</returns>
+            <response code="200">Social login successful; token returned.</response>
+            <response code="400">Invalid social token or missing required fields.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.AuthController.RefreshToken(Arooba.API.Controllers.RefreshTokenRequest,System.Threading.CancellationToken)">
+            <summary>
+            Refreshes an expired access token using a valid refresh token.
+            </summary>
+            <param name="request">The refresh token request.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>A new JWT token pair.</returns>
+            <response code="200">Tokens refreshed successfully.</response>
+            <response code="400">Invalid or expired refresh token.</response>
+        </member>
+        <member name="T:Arooba.API.Controllers.RefreshTokenRequest">
+            <summary>
+            Request body for token refresh.
+            </summary>
+        </member>
+        <member name="T:Arooba.API.Controllers.RefreshTokenResponse">
+            <summary>
+            Response for token refresh.
+            </summary>
+        </member>
+        <member name="T:Arooba.API.Controllers.CategoriesController">
+            <summary>
+            Provides read access to the product category taxonomy used across the marketplace.
+            Categories drive catalog browsing, product classification, and analytics segmentation.
+            </summary>
+        </member>
+        <member name="M:Arooba.API.Controllers.CategoriesController.GetCategories(System.Threading.CancellationToken)">
+            <summary>
+            Retrieves all product categories available on the marketplace.
+            </summary>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>A flat list of all categories with their uplift configuration.</returns>
+            <response code="200">Categories retrieved successfully.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.CategoriesController.GetCategory(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves a single product category by its identifier.
+            </summary>
+            <param name="id">The category identifier (e.g., "jewelry-accessories").</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>The category details including uplift configuration.</returns>
+            <response code="200">Category found and returned.</response>
+            <response code="404">Category with the specified identifier was not found.</response>
+        </member>
+        <member name="T:Arooba.API.Controllers.CustomersController">
+            <summary>
+            Complete Customer CRM controller for the Arooba Marketplace.
+            Manages customer profiles, addresses, orders, reviews, performance metrics,
+            login history, activity logs, and audit trails.
+            </summary>
+        </member>
+        <member name="M:Arooba.API.Controllers.CustomersController.GetCustomers(System.String,System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves a paginated list of customers with optional search filtering.
+            </summary>
+            <param name="search">Free-text search across customer name, email, and mobile number.</param>
+            <param name="pageNumber">The page number to retrieve (1-based). Defaults to 1.</param>
+            <param name="pageSize">The number of items per page. Defaults to 10.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>A paginated list of customer summaries.</returns>
+            <response code="200">Customer list retrieved successfully.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.CustomersController.GetCustomer(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves a single customer by identifier with addresses, order statistics,
+            loyalty points, and wallet balance.
+            </summary>
+            <param name="id">The unique identifier of the customer.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>The customer detail including addresses and aggregated statistics.</returns>
+            <response code="200">Customer found and returned.</response>
+            <response code="404">Customer not found.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.CustomersController.CreateCustomer(Arooba.Application.Features.Customers.Commands.CreateCustomerCommand,System.Threading.CancellationToken)">
+            <summary>
+            Registers a new customer on the marketplace.
+            </summary>
+            <param name="command">The customer registration details.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>The identifier of the newly created customer.</returns>
+            <response code="201">Customer registered successfully.</response>
+            <response code="400">Validation failed.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.CustomersController.UpdateCustomer(System.Int32,Arooba.Application.Features.Customers.Commands.UpdateCustomerCommand,System.Threading.CancellationToken)">
+            <summary>
+            Updates an existing customer's profile information.
+            </summary>
+            <param name="id">The unique identifier of the customer to update.</param>
+            <param name="command">The updated customer details.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>No content on success.</returns>
+            <response code="204">Customer profile updated successfully.</response>
+            <response code="400">Validation failed or identifier mismatch.</response>
+            <response code="404">Customer not found.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.CustomersController.UpdateCustomerStatus(System.Int32,Arooba.Application.Features.Customers.Commands.UpdateCustomerStatusCommand,System.Threading.CancellationToken)">
+            <summary>
+            Updates a customer's account status (activate, deactivate, block, unblock).
+            </summary>
+            <param name="id">The unique identifier of the customer.</param>
+            <param name="command">The status update details.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>No content on success.</returns>
+            <response code="204">Customer status updated successfully.</response>
+            <response code="400">Validation failed.</response>
+            <response code="404">Customer not found.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.CustomersController.GetAddresses(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves a customer's delivery addresses.
+            </summary>
+            <param name="id">The unique identifier of the customer.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>The customer detail with addresses.</returns>
+            <response code="200">Addresses retrieved successfully.</response>
+            <response code="404">Customer not found.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.CustomersController.AddAddress(System.Int32,Arooba.Application.Features.Customers.Commands.AddCustomerAddressCommand,System.Threading.CancellationToken)">
+            <summary>
+            Adds a new delivery address to a customer's address book.
+            </summary>
+            <param name="id">The unique identifier of the customer.</param>
+            <param name="command">The address details.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>The identifier of the newly created address.</returns>
+            <response code="201">Address added successfully.</response>
+            <response code="400">Validation failed.</response>
+            <response code="404">Customer not found.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.CustomersController.GetCustomerReviews(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves all reviews submitted by a specific customer.
+            </summary>
+            <param name="id">The unique identifier of the customer.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>A list of customer reviews with product and order context.</returns>
+            <response code="200">Reviews retrieved successfully.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.CustomersController.SubmitReview(System.Int32,Arooba.Application.Features.Customers.Commands.SubmitReviewCommand,System.Threading.CancellationToken)">
+            <summary>
+            Submits a product review from a customer for a specific order.
+            </summary>
+            <param name="id">The unique identifier of the customer.</param>
+            <param name="command">The review details including rating and optional text.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>The identifier of the newly created review.</returns>
+            <response code="201">Review submitted successfully.</response>
+            <response code="400">Validation failed or duplicate review.</response>
+            <response code="404">Customer or order not found.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.CustomersController.GetCustomerPerformance(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves performance metrics for a customer including RFM scores,
+            loyalty tier progress, spending trends, and referral statistics.
+            </summary>
+            <param name="id">The unique identifier of the customer.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>Customer performance and loyalty metrics.</returns>
+            <response code="200">Performance data retrieved successfully.</response>
+            <response code="404">Customer not found.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.CustomersController.GetLoginHistory(System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves login history for a customer with device, IP, and session data.
+            </summary>
+            <param name="id">The unique identifier of the customer.</param>
+            <param name="limit">Maximum number of entries to return. Defaults to 50.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>A list of login history entries.</returns>
+            <response code="200">Login history retrieved successfully.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.CustomersController.GetCustomerActivity(System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves user activity timeline for a customer including product views,
+            searches, cart actions, purchases, and more.
+            </summary>
+            <param name="id">The unique identifier of the customer.</param>
+            <param name="limit">Maximum number of entries to return. Defaults to 50.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>A list of activity entries.</returns>
+            <response code="200">Activity log retrieved successfully.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.CustomersController.GetCustomerAuditLogs(System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves audit log entries related to a specific customer including
+            account changes, tier upgrades, wallet transactions, and admin actions.
+            </summary>
+            <param name="id">The unique identifier of the customer.</param>
+            <param name="limit">Maximum number of entries to return. Defaults to 50.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>A list of audit log entries.</returns>
+            <response code="200">Audit logs retrieved successfully.</response>
+        </member>
+        <member name="T:Arooba.API.Controllers.DashboardController">
+            <summary>
+            Provides aggregated dashboard KPIs and analytics data for the Arooba Marketplace
+            admin panel. Powers the executive overview, operational monitoring, and trend analysis.
+            </summary>
+        </member>
+        <member name="M:Arooba.API.Controllers.DashboardController.GetStats(System.Threading.CancellationToken)">
+            <summary>
+            Retrieves aggregate key performance indicators (KPIs) for the marketplace.
+            </summary>
+            <remarks>
+            Returns real-time aggregated statistics including:
+            - Total GMV (Gross Merchandise Value in EGP)
+            - Total orders (lifetime count)
+            - Active vendors (approved and operating)
+            - Registered customers
+            - Average order value (EGP)
+            - COD ratio (percentage of orders using Cash on Delivery)
+            - Return rate (percentage of delivered orders that were returned)
+            - Monthly growth rate (GMV month-over-month)
+            </remarks>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>The dashboard statistics snapshot.</returns>
+            <response code="200">Dashboard statistics retrieved successfully.</response>
+        </member>
+        <member name="T:Arooba.API.Controllers.FinanceController">
+            <summary>
+            Manages the financial subsystem of the Arooba Marketplace including vendor wallets,
+            ledger entries, transaction splits (5-bucket model), and payout processing.
+            All monetary values are in Egyptian Pounds (EGP).
+            </summary>
+        </member>
+        <member name="M:Arooba.API.Controllers.FinanceController.GetVendorWallet(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves the wallet balance summary for a specific vendor.
+            </summary>
+            <remarks>
+            The wallet shows:
+            - Total balance (all funds associated with the vendor)
+            - Pending balance (funds in 14-day escrow hold)
+            - Available balance (withdrawable amount above minimum payout threshold of 500 EGP)
+            - Lifetime earnings (cumulative total since account creation)
+            </remarks>
+            <param name="vendorId">The unique identifier of the vendor.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>The vendor wallet with balance breakdown.</returns>
+            <response code="200">Wallet retrieved successfully.</response>
+            <response code="404">Vendor with the specified identifier was not found.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.FinanceController.GetLedgerEntries(System.Int32,System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves paginated ledger entries (financial transaction history) for a specific vendor.
+            </summary>
+            <remarks>
+            Ledger entries track every financial movement: sales, commissions, VAT, shipping fees,
+            refunds, and payouts. Each entry includes a running balance.
+            </remarks>
+            <param name="vendorId">The unique identifier of the vendor.</param>
+            <param name="pageNumber">The page number to retrieve (1-based). Defaults to 1.</param>
+            <param name="pageSize">The number of items per page. Defaults to 20.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>A paginated list of ledger entries ordered by date descending.</returns>
+            <response code="200">Ledger entries retrieved successfully.</response>
+            <response code="404">Vendor with the specified identifier was not found.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.FinanceController.GetTransactionSplits(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves the 5-bucket transaction splits for all items in a specific order.
+            </summary>
+            <remarks>
+            Each order item is split into five financial buckets:
+            <list type="bullet">
+              <item>Bucket A: Vendor revenue (cost price x quantity)</item>
+              <item>Bucket B: Vendor VAT (14% of Bucket A)</item>
+              <item>Bucket C: Arooba revenue (marketplace uplift + cooperative fee)</item>
+              <item>Bucket D: Arooba VAT (14% of Bucket C)</item>
+              <item>Bucket E: Logistics/delivery fee</item>
+            </list>
+            </remarks>
+            <param name="orderId">The unique identifier of the order.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>A list of transaction splits, one per order item.</returns>
+            <response code="200">Transaction splits retrieved successfully.</response>
+            <response code="404">Order with the specified identifier was not found.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.FinanceController.ProcessPayout(Arooba.Application.Features.Finance.Commands.ProcessPayoutCommand,System.Threading.CancellationToken)">
+            <summary>
+            Processes a payout from a vendor's available balance to their registered bank account.
+            </summary>
+            <remarks>
+            Payout rules:
+            - Available balance must be at or above the minimum payout threshold (500 EGP).
+            - Only funds that have cleared the 14-day escrow period are eligible.
+            - A ledger entry is created for the payout transaction.
+            - The vendor must have bank account details on file.
+            </remarks>
+            <param name="command">
+            The payout request including vendor identifier and amount (or full available balance).
+            </param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>The identifier of the payout transaction.</returns>
+            <response code="200">Payout processed successfully.</response>
+            <response code="400">Insufficient balance, below minimum threshold, or missing bank details.</response>
+            <response code="404">Vendor with the specified identifier was not found.</response>
+        </member>
+        <member name="T:Arooba.API.Controllers.OrdersController">
+            <summary>
+            Manages the order lifecycle on the Arooba Marketplace (OMS).
+            Handles order creation (including multi-vendor cart splitting into shipments),
+            status transitions, and order retrieval with full financial breakdown.
+            </summary>
+        </member>
+        <member name="M:Arooba.API.Controllers.OrdersController.GetOrders(System.Nullable{Arooba.Domain.Enums.OrderStatus},System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves a paginated list of orders with optional filtering.
+            </summary>
+            <param name="status">Filter by order status (Pending, Accepted, ReadyToShip, InTransit, Delivered, Returned, Cancelled).</param>
+            <param name="customerId">Filter by the customer who placed the order.</param>
+            <param name="vendorId">Filter by vendor involved in the order.</param>
+            <param name="from">Filter orders created on or after this date (UTC).</param>
+            <param name="to">Filter orders created on or before this date (UTC).</param>
+            <param name="pageNumber">The page number to retrieve (1-based). Defaults to 1.</param>
+            <param name="pageSize">The number of items per page. Defaults to 10.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>A paginated list of order summaries.</returns>
+            <response code="200">Order list retrieved successfully.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.OrdersController.GetOrder(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves a single order by identifier with complete details including
+            line items, shipments, and the 5-bucket financial split per item.
+            </summary>
+            <remarks>
+            The 5-bucket split for each order item:
+            <list type="bullet">
+              <item>Bucket A: Vendor revenue (cost price)</item>
+              <item>Bucket B: Vendor VAT (14% on vendor revenue)</item>
+              <item>Bucket C: Arooba revenue (marketplace uplift + cooperative fee)</item>
+              <item>Bucket D: Arooba VAT (14% on Arooba revenue)</item>
+              <item>Bucket E: Logistics fee (shipping/delivery)</item>
+            </list>
+            </remarks>
+            <param name="id">The unique identifier of the order.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>The order detail including items, shipments, and financial breakdown.</returns>
+            <response code="200">Order found and returned.</response>
+            <response code="404">Order with the specified identifier was not found.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.OrdersController.CreateOrder(Arooba.Application.Features.Orders.Commands.CreateOrderCommand,System.Threading.CancellationToken)">
+            <summary>
+            Creates a new order on the marketplace.
+            </summary>
+            <remarks>
+            This is the most complex operation in the system. It:
+            <list type="number">
+              <item>Validates product availability and pricing</item>
+              <item>Runs the pricing engine to compute the 5-bucket split for each item</item>
+              <item>Groups items by pickup location to create separate shipments</item>
+              <item>Calculates delivery fees per shipment based on zone-to-zone rate cards</item>
+              <item>Creates escrow holds on vendor wallets (14-day escrow period)</item>
+              <item>Records ledger entries for all financial movements</item>
+            </list>
+            </remarks>
+            <param name="command">
+            The order details including customer, delivery address, line items, and payment method.
+            </param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>The identifier of the newly created order.</returns>
+            <response code="201">Order created successfully.</response>
+            <response code="400">Validation failed (e.g., out-of-stock items, invalid address zone).</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.OrdersController.UpdateOrderStatus(System.Int32,Arooba.Application.Features.Orders.Commands.UpdateOrderStatusCommand,System.Threading.CancellationToken)">
+            <summary>
+            Updates the status of an existing order (e.g., accept, mark ready to ship, deliver, cancel).
+            </summary>
+            <remarks>
+            Status transitions are validated against the order state machine:
+            Pending -> Accepted -> ReadyToShip -> InTransit -> Delivered
+            Pending -> Cancelled (before acceptance)
+            InTransit -> Returned (after delivery attempt)
+            Any -> RejectedShipping (logistics rejection)
+            </remarks>
+            <param name="id">The unique identifier of the order.</param>
+            <param name="command">The new status and optional notes/reason.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>No content on success.</returns>
+            <response code="204">Order status updated successfully.</response>
+            <response code="400">Invalid status transition.</response>
+            <response code="404">Order with the specified identifier was not found.</response>
+        </member>
+        <member name="T:Arooba.API.Controllers.PricingController">
+            <summary>
+            Exposes the Arooba pricing engine for calculating product price breakdowns
+            and checking price deviations from category averages.
+            </summary>
+        </member>
+        <member name="M:Arooba.API.Controllers.PricingController.CalculatePrice(Arooba.Application.Features.Pricing.Commands.CalculatePrice.CalculatePriceCommand,System.Threading.CancellationToken)">
+            <summary>
+            Calculates a full price breakdown for a given product configuration.
+            </summary>
+            <remarks>
+            The breakdown includes:
+            - Cost price (vendor's base cost)
+            - Sub-vendor uplift (fixed EGP or percentage)
+            - Cooperative fee (5% for non-legalized vendors, 0% for legalized)
+            - Marketplace uplift (Arooba's margin)
+            - VAT (14%)
+            - Final customer price
+            </remarks>
+            <param name="command">The pricing parameters including cost price, vendor type, and uplift configuration.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>A detailed price breakdown showing each pricing component.</returns>
+            <response code="200">Price breakdown calculated successfully.</response>
+            <response code="400">Invalid pricing parameters provided.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.PricingController.CheckPriceDeviation(Arooba.Application.Features.Pricing.Queries.CheckPriceDeviation.CheckPriceDeviationQuery,System.Threading.CancellationToken)">
+            <summary>
+            Checks whether a product price deviates significantly from the category average.
+            Products flagged will require manual review before listing.
+            </summary>
+            <param name="query">The price deviation check parameters.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>Price deviation analysis with flagging status.</returns>
+            <response code="200">Deviation check completed.</response>
+            <response code="400">Invalid parameters provided.</response>
+        </member>
+        <member name="T:Arooba.API.Controllers.ProductsController">
+            <summary>
+            Manages the product catalog (PIM) for the Arooba Marketplace.
+            Products follow the pricing engine pipeline: cost price, sub-vendor uplift,
+            cooperative fee, marketplace uplift, and VAT to arrive at the final customer price.
+            </summary>
+        </member>
+        <member name="M:Arooba.API.Controllers.ProductsController.GetProducts(System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{Arooba.Domain.Enums.ProductStatus},System.Nullable{System.Decimal},System.Nullable{System.Decimal},System.String,System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves a paginated, filterable list of products in the marketplace catalog.
+            </summary>
+            <param name="category">Filter by category identifier.</param>
+            <param name="vendor">Filter by vendor (parent) identifier.</param>
+            <param name="status">Filter by product status (Draft, PendingReview, Active, Paused, Rejected).</param>
+            <param name="minPrice">Minimum final price filter (EGP).</param>
+            <param name="maxPrice">Maximum final price filter (EGP).</param>
+            <param name="search">Free-text search across product title, description, and SKU.</param>
+            <param name="pageNumber">The page number to retrieve (1-based). Defaults to 1.</param>
+            <param name="pageSize">The number of items per page. Defaults to 10.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>A paginated list of product summaries with pricing information.</returns>
+            <response code="200">Product list retrieved successfully.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.ProductsController.GetProduct(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves a single product by identifier with its full pricing breakdown.
+            </summary>
+            <remarks>
+            The response includes the 5-bucket pricing breakdown:
+            cost price, sub-vendor uplift, cooperative fee, marketplace uplift, and VAT.
+            </remarks>
+            <param name="id">The unique identifier of the product.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>The product detail including pricing breakdown, vendor info, and logistics data.</returns>
+            <response code="200">Product found and returned.</response>
+            <response code="404">Product with the specified identifier was not found.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.ProductsController.CreateProduct(Arooba.Application.Features.Products.Commands.CreateProductCommand,System.Threading.CancellationToken)">
+            <summary>
+            Creates a new product listing in the marketplace catalog.
+            The product will be placed in <c>Draft</c> or <c>PendingReview</c> status depending on vendor settings.
+            </summary>
+            <param name="command">
+            The product details including title, description, pricing, category, pickup location,
+            stock mode, weight/dimensions, and image URLs.
+            </param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>The identifier of the newly created product.</returns>
+            <response code="201">Product created successfully.</response>
+            <response code="400">Validation failed (e.g., missing required fields or invalid pricing).</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.ProductsController.UpdateProduct(System.Int32,Arooba.Application.Features.Products.Commands.UpdateProductCommand,System.Threading.CancellationToken)">
+            <summary>
+            Updates an existing product's details. Re-triggers the pricing engine to recalculate
+            the final price if cost price or uplift parameters have changed.
+            </summary>
+            <param name="id">The unique identifier of the product to update.</param>
+            <param name="command">The updated product details.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>No content on success.</returns>
+            <response code="204">Product updated successfully.</response>
+            <response code="400">Validation failed or identifier mismatch.</response>
+            <response code="404">Product with the specified identifier was not found.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.ProductsController.ChangeProductStatus(System.Int32,Arooba.Application.Features.Products.Commands.UpdateProductStatusCommand,System.Threading.CancellationToken)">
+            <summary>
+            Changes the status of an existing product (e.g., submit for review, approve, pause, reject).
+            </summary>
+            <param name="id">The unique identifier of the product.</param>
+            <param name="command">The new status and optional reason for the transition.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>No content on success.</returns>
+            <response code="204">Product status updated successfully.</response>
+            <response code="400">Invalid status transition or validation error.</response>
+            <response code="404">Product with the specified identifier was not found.</response>
+        </member>
+        <member name="T:Arooba.API.Controllers.ShippingController">
+            <summary>
+            Manages shipping zones, rate cards, and delivery fee calculations for the Arooba Marketplace.
+            Egypt is divided into shipping zones, and delivery fees are calculated based on
+            origin-to-destination zone pairs, product weight, and volumetric dimensions.
+            </summary>
+        </member>
+        <member name="M:Arooba.API.Controllers.ShippingController.GetShippingZones(System.Threading.CancellationToken)">
+            <summary>
+            Retrieves all shipping zones defined in the system.
+            </summary>
+            <remarks>
+            Shipping zones represent geographic regions in Egypt (e.g., Greater Cairo, Alexandria,
+            Delta, Upper Egypt). Each zone covers specific cities and is used for rate card lookups.
+            </remarks>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>A list of all shipping zones with their covered cities.</returns>
+            <response code="200">Shipping zones retrieved successfully.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.ShippingController.GetRateCards(System.Threading.CancellationToken)">
+            <summary>
+            Retrieves all active shipping rate cards between zones.
+            </summary>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>A list of active rate cards with zone-to-zone pricing.</returns>
+            <response code="200">Rate cards retrieved successfully.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.ShippingController.CalculateShippingFee(Arooba.Application.Features.Shipping.Queries.CalculateShippingFeeQuery,System.Threading.CancellationToken)">
+            <summary>
+            Calculates the delivery fee for shipping a product between two zones.
+            </summary>
+            <remarks>
+            The fee is calculated using the rate card for the origin-destination zone pair:
+            <code>Fee = BasePrice + (ChargeableWeight * PricePerKg)</code>
+            Where chargeable weight = max(actual weight, volumetric weight).
+            Volumetric weight = (Length * Width * Height) / 5000.
+            </remarks>
+            <param name="query">
+            The shipping fee calculation parameters including origin zone, destination zone,
+            actual weight (kg), and optional dimensions (cm) for volumetric weight calculation.
+            </param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>The calculated shipping fee breakdown in EGP.</returns>
+            <response code="200">Shipping fee calculated successfully.</response>
+            <response code="400">Invalid zone identifiers or missing required parameters.</response>
+        </member>
+        <member name="T:Arooba.API.Controllers.VendorsController">
+            <summary>
+            Manages the vendor ecosystem including parent vendors, sub-vendors, and vendor lifecycle.
+            Supports both legalized vendors (with commercial registration) and non-legalized vendors
+            (artisans, home businesses) operating through a cooperative umbrella.
+            </summary>
+        </member>
+        <member name="M:Arooba.API.Controllers.VendorsController.GetVendors(System.Nullable{Arooba.Domain.Enums.VendorStatus},System.Nullable{Arooba.Domain.Enums.VendorType},System.String,System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves a paginated list of vendors with optional filtering by status, type, and search term.
+            </summary>
+            <param name="status">Filter by vendor approval status (Pending, Active, Suspended, Rejected).</param>
+            <param name="type">Filter by vendor type (Legalized, NonLegalized).</param>
+            <param name="search">Free-text search across business name and contact information.</param>
+            <param name="pageNumber">The page number to retrieve (1-based). Defaults to 1.</param>
+            <param name="pageSize">The number of items per page. Defaults to 10.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>A paginated list of vendor summaries.</returns>
+            <response code="200">Vendor list retrieved successfully.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.VendorsController.GetVendor(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves a single vendor by identifier, including their sub-vendor hierarchy and metrics.
+            </summary>
+            <param name="id">The unique identifier of the vendor.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>The vendor detail including sub-vendors, financial metrics, and status history.</returns>
+            <response code="200">Vendor found and returned.</response>
+            <response code="404">Vendor with the specified identifier was not found.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.VendorsController.CreateVendor(Arooba.Application.Features.Vendors.Commands.CreateVendorCommand,System.Threading.CancellationToken)">
+            <summary>
+            Registers a new parent vendor on the marketplace.
+            The vendor will be placed in <c>Pending</c> status awaiting admin approval.
+            </summary>
+            <param name="command">
+            The vendor registration details including business name, type (legalized/non-legalized),
+            legal documents (commercial reg, tax ID), bank details, and cooperative assignment.
+            </param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>The identifier of the newly created vendor.</returns>
+            <response code="201">Vendor created successfully and pending review.</response>
+            <response code="400">Validation failed (e.g., missing required legal documents for legalized vendors).</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.VendorsController.UpdateVendor(System.Int32,Arooba.Application.Features.Vendors.Commands.UpdateVendorCommand,System.Threading.CancellationToken)">
+            <summary>
+            Updates an existing vendor's profile information.
+            </summary>
+            <param name="id">The unique identifier of the vendor to update.</param>
+            <param name="command">The updated vendor details.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>No content on success.</returns>
+            <response code="204">Vendor updated successfully.</response>
+            <response code="400">Validation failed or identifier mismatch.</response>
+            <response code="404">Vendor with the specified identifier was not found.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.VendorsController.GetSubVendors(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves the list of sub-vendors under a parent vendor.
+            </summary>
+            <param name="id">The unique identifier of the parent vendor.</param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>A list of sub-vendors belonging to the parent vendor.</returns>
+            <response code="200">Sub-vendors retrieved successfully.</response>
+            <response code="404">Parent vendor with the specified identifier was not found.</response>
+        </member>
+        <member name="M:Arooba.API.Controllers.VendorsController.CreateSubVendor(System.Int32,Arooba.Application.Features.Vendors.Commands.CreateSubVendor.CreateSubVendorCommand,System.Threading.CancellationToken)">
+            <summary>
+            Creates a sub-vendor under the specified parent vendor.
+            Sub-vendors represent individual sellers (e.g., "Aunt Nadia") managed by the parent.
+            </summary>
+            <param name="id">The unique identifier of the parent vendor.</param>
+            <param name="command">
+            The sub-vendor details including internal name, default lead time, and uplift configuration.
+            </param>
+            <param name="cancellationToken">Cancellation token for the request.</param>
+            <returns>The identifier of the newly created sub-vendor.</returns>
+            <response code="201">Sub-vendor created successfully.</response>
+            <response code="400">Validation failed or parent vendor identifier mismatch.</response>
+            <response code="404">Parent vendor with the specified identifier was not found.</response>
+        </member>
+        <member name="T:Arooba.API.Extensions.ServiceCollectionExtensions">
+            <summary>
+            Extension methods for registering API-layer services such as controllers,
+            exception filters, and health checks into the DI container.
+            </summary>
+        </member>
+        <member name="M:Arooba.API.Extensions.ServiceCollectionExtensions.AddApiServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds all API-layer services including controllers with the global exception filter,
+            API behavior configuration, and any API-specific singleton services.
+            </summary>
+            <param name="services">The service collection to configure.</param>
+            <returns>The same service collection for chaining.</returns>
+        </member>
+        <member name="M:Arooba.API.Extensions.ServiceCollectionExtensions.AddAroobaHealthChecks(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Adds health check endpoints including SQL Server database connectivity
+            using the centralized connection string from configuration.
+            </summary>
+            <param name="services">The service collection to configure.</param>
+            <param name="configuration">The application configuration containing connection strings.</param>
+            <returns>The same service collection for chaining.</returns>
+        </member>
+        <member name="T:Arooba.API.Filters.ApiExceptionFilterAttribute">
+            <summary>
+            An alternative exception filter attribute that can be applied at the controller or action level
+            as a backup to the global <see cref="T:Arooba.API.Middleware.ExceptionHandlingMiddleware"/>.
+            Converts known application exceptions into appropriate <see cref="T:Microsoft.AspNetCore.Mvc.ProblemDetails"/> responses.
+            </summary>
+        </member>
+        <member name="M:Arooba.API.Filters.ApiExceptionFilterAttribute.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Arooba.API.Filters.ApiExceptionFilterAttribute"/> class
+            and registers all known exception-to-response mappings.
+            </summary>
+        </member>
+        <member name="M:Arooba.API.Filters.ApiExceptionFilterAttribute.OnException(Microsoft.AspNetCore.Mvc.Filters.ExceptionContext)">
+            <summary>
+            Called when an exception is thrown during action execution. Attempts to map
+            the exception to an appropriate HTTP response.
+            </summary>
+            <param name="context">The exception context containing the thrown exception.</param>
+        </member>
+        <member name="T:Arooba.API.Middleware.ExceptionHandlingMiddleware">
+            <summary>
+            Global exception-handling middleware that intercepts unhandled exceptions thrown anywhere
+            in the request pipeline and converts them into consistent, RFC 7807-compliant JSON responses.
+            </summary>
+            <remarks>
+            <para>Exception mapping:</para>
+            <list type="bullet">
+              <item><see cref="T:FluentValidation.ValidationException"/> from FluentValidation produces <c>400 Bad Request</c> with an errors dictionary.</item>
+              <item><see cref="T:Arooba.Application.Common.Exceptions.NotFoundException"/> produces <c>404 Not Found</c>.</item>
+              <item><see cref="T:Arooba.Application.Common.Exceptions.ForbiddenAccessException"/> produces <c>403 Forbidden</c>.</item>
+              <item><see cref="T:Arooba.Application.Common.Exceptions.BadRequestException"/> produces <c>400 Bad Request</c>.</item>
+              <item>All other exceptions produce <c>500 Internal Server Error</c> (with details only in Development).</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="M:Arooba.API.Middleware.ExceptionHandlingMiddleware.#ctor(Microsoft.AspNetCore.Http.RequestDelegate,Microsoft.Extensions.Logging.ILogger{Arooba.API.Middleware.ExceptionHandlingMiddleware},Microsoft.Extensions.Hosting.IHostEnvironment)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Arooba.API.Middleware.ExceptionHandlingMiddleware"/> class.
+            </summary>
+            <param name="next">The next middleware in the pipeline.</param>
+            <param name="logger">Logger for recording exception details.</param>
+            <param name="environment">The hosting environment, used to toggle detail exposure.</param>
+        </member>
+        <member name="M:Arooba.API.Middleware.ExceptionHandlingMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            Invokes the middleware, wrapping the downstream pipeline in exception handling.
+            </summary>
+            <param name="context">The current HTTP context.</param>
+        </member>
+        <member name="T:Arooba.API.Middleware.ExceptionHandlingMiddleware.ErrorResponse">
+            <summary>
+            Standard error response envelope conforming to RFC 7807 problem details.
+            </summary>
+        </member>
+        <member name="P:Arooba.API.Middleware.ExceptionHandlingMiddleware.ErrorResponse.Type">
+            <summary>A URI reference that identifies the problem type.</summary>
+        </member>
+        <member name="P:Arooba.API.Middleware.ExceptionHandlingMiddleware.ErrorResponse.Title">
+            <summary>A short, human-readable summary of the problem.</summary>
+        </member>
+        <member name="P:Arooba.API.Middleware.ExceptionHandlingMiddleware.ErrorResponse.Status">
+            <summary>The HTTP status code.</summary>
+        </member>
+        <member name="P:Arooba.API.Middleware.ExceptionHandlingMiddleware.ErrorResponse.Errors">
+            <summary>A dictionary of validation or error messages keyed by property name.</summary>
+        </member>
+    </members>
+</doc>

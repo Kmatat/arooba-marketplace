@@ -35,6 +35,11 @@ public static class DependencyInjection
                 "Set it via environment variable, user secrets, or appsettings.");
         }
 
+        // Register domain and application services BEFORE DbContext
+        services.AddScoped<IDateTimeService, DateTimeService>();
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
+     
+
         // Register the auditable entity interceptor
         services.AddScoped<AuditableEntityInterceptor>();
 
@@ -64,11 +69,9 @@ public static class DependencyInjection
         // Register the generic repository for all entity types
         services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
 
-        // Register application services
-        services.AddTransient<IDateTimeService, DateTimeService>();
+        // Register other application services
         services.AddTransient<IPricingService, PricingService>();
         services.AddTransient<IIdentityService, IdentityService>();
-        services.AddScoped<ICurrentUserService, CurrentUserService>();
 
         // Register OTP service (ADVANSYS SMS gateway)
         services.AddHttpClient("Advansys");

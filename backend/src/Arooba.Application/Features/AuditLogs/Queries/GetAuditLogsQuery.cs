@@ -21,7 +21,7 @@ public record GetAuditLogsQuery : IRequest<PaginatedList<AuditLogDto>>
 
 public record AuditLogDto
 {
-    public Guid Id { get; init; }
+    public int Id { get; init; }
     public string UserId { get; init; } = string.Empty;
     public string UserName { get; init; } = string.Empty;
     public string UserRole { get; init; } = string.Empty;
@@ -33,6 +33,6 @@ public record AuditLogDto
     public string? OldValues { get; init; }
     public string? NewValues { get; init; }
     public string? IpAddress { get; init; }
-    public Guid? VendorActionRequestId { get; init; }
+    public int? VendorActionRequestId { get; init; }
     public DateTime CreatedAt { get; init; }
 }

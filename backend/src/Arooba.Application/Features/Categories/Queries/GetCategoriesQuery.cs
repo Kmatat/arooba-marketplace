@@ -14,7 +14,7 @@ public record GetCategoriesQuery : IRequest<IReadOnlyList<CategoryDto>>;
 /// </summary>
 public record CategoryDto
 {
-    public string Id { get; init; } = string.Empty;
+    public int Id { get; init; } 
     public string NameEn { get; init; } = string.Empty;
     public string NameAr { get; init; } = string.Empty;
     public string? Icon { get; init; }
@@ -48,7 +48,7 @@ public class GetCategoriesQueryHandler : IRequestHandler<GetCategoriesQuery, IRe
             {
                 Id = c.Id,
                 NameEn = c.NameEn,
-                NameAr = c.NameAr,
+                NameAr = c.Name,
                 Icon = c.Icon,
                 MinUpliftRate = c.MinUpliftRate,
                 MaxUpliftRate = c.MaxUpliftRate,

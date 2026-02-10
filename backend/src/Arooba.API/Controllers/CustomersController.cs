@@ -55,11 +55,11 @@ public class CustomersController : ApiControllerBase
     /// <returns>The customer detail including addresses and aggregated statistics.</returns>
     /// <response code="200">Customer found and returned.</response>
     /// <response code="404">Customer not found.</response>
-    [HttpGet("{id:guid}")]
+    [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(CustomerDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetCustomer(
-        Guid id,
+        int id,
         CancellationToken cancellationToken)
     {
         var result = await Sender.Send(new GetCustomerByIdQuery { CustomerId = id }, cancellationToken);
@@ -75,7 +75,7 @@ public class CustomersController : ApiControllerBase
     /// <response code="201">Customer registered successfully.</response>
     /// <response code="400">Validation failed.</response>
     [HttpPost]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateCustomer(
         [FromBody] CreateCustomerCommand command,
@@ -95,12 +95,12 @@ public class CustomersController : ApiControllerBase
     /// <response code="204">Customer profile updated successfully.</response>
     /// <response code="400">Validation failed or identifier mismatch.</response>
     /// <response code="404">Customer not found.</response>
-    [HttpPut("{id:guid}")]
+    [HttpPut("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateCustomer(
-        Guid id,
+        int id,
         [FromBody] UpdateCustomerCommand command,
         CancellationToken cancellationToken)
     {
@@ -128,12 +128,12 @@ public class CustomersController : ApiControllerBase
     /// <response code="204">Customer status updated successfully.</response>
     /// <response code="400">Validation failed.</response>
     /// <response code="404">Customer not found.</response>
-    [HttpPut("{id:guid}/status")]
+    [HttpPut("{id:int}/status")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateCustomerStatus(
-        Guid id,
+        int id,
         [FromBody] UpdateCustomerStatusCommand command,
         CancellationToken cancellationToken)
     {
@@ -163,11 +163,11 @@ public class CustomersController : ApiControllerBase
     /// <returns>The customer detail with addresses.</returns>
     /// <response code="200">Addresses retrieved successfully.</response>
     /// <response code="404">Customer not found.</response>
-    [HttpGet("{id:guid}/addresses")]
+    [HttpGet("{id:int}/addresses")]
     [ProducesResponseType(typeof(CustomerDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetAddresses(
-        Guid id,
+        int id,
         CancellationToken cancellationToken)
     {
         var customer = await Sender.Send(new GetCustomerByIdQuery { CustomerId = id }, cancellationToken);
@@ -184,12 +184,12 @@ public class CustomersController : ApiControllerBase
     /// <response code="201">Address added successfully.</response>
     /// <response code="400">Validation failed.</response>
     /// <response code="404">Customer not found.</response>
-    [HttpPost("{id:guid}/addresses")]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
+    [HttpPost("{id:int}/addresses")]
+    [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> AddAddress(
-        Guid id,
+        int id,
         [FromBody] AddCustomerAddressCommand command,
         CancellationToken cancellationToken)
     {
@@ -218,10 +218,10 @@ public class CustomersController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token for the request.</param>
     /// <returns>A list of customer reviews with product and order context.</returns>
     /// <response code="200">Reviews retrieved successfully.</response>
-    [HttpGet("{id:guid}/reviews")]
+    [HttpGet("{id:int}/reviews")]
     [ProducesResponseType(typeof(List<CustomerReviewDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCustomerReviews(
-        Guid id,
+        int id,
         CancellationToken cancellationToken)
     {
         var result = await Sender.Send(new GetCustomerReviewsQuery { CustomerId = id }, cancellationToken);
@@ -238,12 +238,12 @@ public class CustomersController : ApiControllerBase
     /// <response code="201">Review submitted successfully.</response>
     /// <response code="400">Validation failed or duplicate review.</response>
     /// <response code="404">Customer or order not found.</response>
-    [HttpPost("{id:guid}/reviews")]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
+    [HttpPost("{id:int}/reviews")]
+    [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> SubmitReview(
-        Guid id,
+        int id,
         [FromBody] SubmitReviewCommand command,
         CancellationToken cancellationToken)
     {
@@ -274,11 +274,11 @@ public class CustomersController : ApiControllerBase
     /// <returns>Customer performance and loyalty metrics.</returns>
     /// <response code="200">Performance data retrieved successfully.</response>
     /// <response code="404">Customer not found.</response>
-    [HttpGet("{id:guid}/performance")]
+    [HttpGet("{id:int}/performance")]
     [ProducesResponseType(typeof(CustomerPerformanceDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetCustomerPerformance(
-        Guid id,
+        int id,
         CancellationToken cancellationToken)
     {
         var result = await Sender.Send(new GetCustomerPerformanceQuery { CustomerId = id }, cancellationToken);
@@ -297,10 +297,10 @@ public class CustomersController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token for the request.</param>
     /// <returns>A list of login history entries.</returns>
     /// <response code="200">Login history retrieved successfully.</response>
-    [HttpGet("{id:guid}/logins")]
+    [HttpGet("{id:int}/logins")]
     [ProducesResponseType(typeof(List<CustomerLoginDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetLoginHistory(
-        Guid id,
+        int id,
         [FromQuery] int limit = 50,
         CancellationToken cancellationToken = default)
     {
@@ -323,10 +323,10 @@ public class CustomersController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token for the request.</param>
     /// <returns>A list of activity entries.</returns>
     /// <response code="200">Activity log retrieved successfully.</response>
-    [HttpGet("{id:guid}/activity")]
+    [HttpGet("{id:int}/activity")]
     [ProducesResponseType(typeof(List<CustomerActivityDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCustomerActivity(
-        Guid id,
+        int id,
         [FromQuery] int limit = 50,
         CancellationToken cancellationToken = default)
     {
@@ -349,10 +349,10 @@ public class CustomersController : ApiControllerBase
     /// <param name="cancellationToken">Cancellation token for the request.</param>
     /// <returns>A list of audit log entries.</returns>
     /// <response code="200">Audit logs retrieved successfully.</response>
-    [HttpGet("{id:guid}/audit-logs")]
+    [HttpGet("{id:int}/audit-logs")]
     [ProducesResponseType(typeof(List<CustomerAuditLogDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCustomerAuditLogs(
-        Guid id,
+        int id,
         [FromQuery] int limit = 50,
         CancellationToken cancellationToken = default)
     {

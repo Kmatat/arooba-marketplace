@@ -10,7 +10,7 @@ public class CreateVendorCommandValidator : AbstractValidator<CreateVendorComman
 {
     public CreateVendorCommandValidator()
     {
-        RuleFor(v => v.BusinessNameAr)
+        RuleFor(v => v.BusinessName)
             .NotEmpty().WithMessage("Arabic business name is required.")
             .MaximumLength(200).WithMessage("Arabic business name must not exceed 200 characters.");
 

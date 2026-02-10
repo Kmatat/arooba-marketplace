@@ -7,7 +7,7 @@ namespace Arooba.Domain.Events;
 /// Raised when a vendor submits an action request that requires admin approval.
 /// </summary>
 public record VendorActionRequestedEvent(
-    Guid RequestId,
-    Guid VendorId,
+    int RequestId,
+    int VendorId,
     VendorActionType ActionType
 ) : IDomainEvent;

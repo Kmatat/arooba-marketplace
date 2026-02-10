@@ -15,7 +15,7 @@ namespace Arooba.Application.Features.Products.Commands;
 public record UpdateProductStatusCommand : IRequest<bool>
 {
     /// <summary>Gets the product identifier.</summary>
-    public Guid ProductId { get; init; }
+    public int ProductId { get; init; }
 
     /// <summary>Gets the new status to apply.</summary>
     public ProductStatus NewStatus { get; init; }

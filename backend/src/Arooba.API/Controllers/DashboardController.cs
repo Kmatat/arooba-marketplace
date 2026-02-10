@@ -1,5 +1,4 @@
-using Arooba.Application.Features.Dashboard.Queries.GetDashboardStats;
-using Arooba.Application.Features.Dashboard.Queries.GetGmvTrend;
+using Arooba.Application.Features.Dashboard.Queries;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -37,29 +36,29 @@ public class DashboardController : ApiControllerBase
         return Ok(result);
     }
 
-    /// <summary>
-    /// Retrieves a GMV (Gross Merchandise Value) time series for trend analysis.
-    /// </summary>
-    /// <remarks>
-    /// Returns monthly GMV data points for the specified number of trailing months.
-    /// Each data point includes the month label and the total GMV value in EGP.
-    /// This powers the GMV trend chart on the admin dashboard.
-    /// </remarks>
-    /// <param name="months">
-    /// The number of trailing months to include in the trend. Defaults to 6. Maximum 24.
-    /// </param>
-    /// <param name="cancellationToken">Cancellation token for the request.</param>
-    /// <returns>A time series of monthly GMV values.</returns>
-    /// <response code="200">GMV trend data retrieved successfully.</response>
-    /// <response code="400">Invalid months parameter (must be between 1 and 24).</response>
-    [HttpGet("gmv-trend")]
-    [ProducesResponseType(typeof(IReadOnlyList<GmvTrendDataPointDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetGmvTrend(
-        [FromQuery] int months = 6,
-        CancellationToken cancellationToken = default)
-    {
-        var result = await Sender.Send(new GetGmvTrendQuery(months), cancellationToken);
-        return Ok(result);
-    }
+   // <summary>
+    // Retrieves a GMV(Gross Merchandise Value) time series for trend analysis.
+    // </summary>
+    // <remarks>
+    // Returns monthly GMV data points for the specified number of trailing months.
+    // Each data point includes the month label and the total GMV value in EGP.
+    // This powers the GMV trend chart on the admin dashboard.
+    // </remarks>
+    // <param name = "months" >
+    // The number of trailing months to include in the trend. Defaults to 6. Maximum 24.
+    // </param>
+    // <param name = "cancellationToken" > Cancellation token for the request.</param>
+    // <returns>A time series of monthly GMV values.</returns>
+    // <response code = "200" > GMV trend data retrieved successfully.</response>
+    // <response code="400">Invalid months parameter (must be between 1 and 24).</response>
+    //[HttpGet("gmv-trend")]
+    //[ProducesResponseType(typeof(IReadOnlyList<GmvTrendDataPointDto>), StatusCodes.Status200OK)]
+    //[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    //public async Task<IActionResult> GetGmvTrend(
+    //    [FromQuery] int months = 6,
+    //    CancellationToken cancellationToken = default)
+    //{
+    //    //var result = await Sender.Send(new GetGmvTrendQuery(months), cancellationToken);
+    //    return Ok(result);
+    //}
 }

@@ -11,20 +11,20 @@ public record GetActionRequestsQuery : IRequest<PaginatedList<ActionRequestDto>>
 {
     public ApprovalStatus? Status { get; init; }
     public VendorActionType? ActionType { get; init; }
-    public Guid? VendorId { get; init; }
+    public int? VendorId { get; init; }
     public int PageNumber { get; init; } = 1;
     public int PageSize { get; init; } = 20;
 }
 
 public record ActionRequestDto
 {
-    public Guid Id { get; init; }
-    public Guid VendorId { get; init; }
+    public int Id { get; init; }
+    public int VendorId { get; init; }
     public string VendorName { get; init; } = string.Empty;
     public VendorActionType ActionType { get; init; }
     public ApprovalStatus Status { get; init; }
     public string EntityType { get; init; } = string.Empty;
-    public Guid? EntityId { get; init; }
+    public int? EntityId { get; init; }
     public string? CurrentValues { get; init; }
     public string? ProposedValues { get; init; }
     public string? Justification { get; init; }

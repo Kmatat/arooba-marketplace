@@ -11,7 +11,7 @@ namespace Arooba.Domain.Entities;
 public class VendorActionRequest : AuditableEntity
 {
     /// <summary>The vendor who initiated the action.</summary>
-    public Guid VendorId { get; set; }
+    public int VendorId { get; set; }
     public ParentVendor? Vendor { get; set; }
 
     /// <summary>The type of action being requested.</summary>
@@ -24,7 +24,7 @@ public class VendorActionRequest : AuditableEntity
     public string EntityType { get; set; } = string.Empty;
 
     /// <summary>The ID of the entity being modified (if applicable).</summary>
-    public Guid? EntityId { get; set; }
+    public int? EntityId { get; set; }
 
     /// <summary>JSON snapshot of current values before the change.</summary>
     public string? CurrentValues { get; set; }

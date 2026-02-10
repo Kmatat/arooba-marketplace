@@ -25,7 +25,7 @@ public class ProductCategoryConfiguration : IEntityTypeConfiguration<ProductCate
             .IsRequired()
             .HasMaxLength(200);
 
-        builder.Property(c => c.NameAr)
+        builder.Property(c => c.Name)
             .IsRequired()
             .HasMaxLength(200);
 

@@ -1,5 +1,6 @@
 using Arooba.Domain.ValueObjects;
 using FluentAssertions;
+using Xunit;
 
 namespace Arooba.Domain.Tests.ValueObjects;
 
@@ -51,7 +52,8 @@ public class PhoneNumberTests
 
         // Assert
         act.Should().Throw<ArgumentException>()
-            .WithParameterName("value");
+            .WithParameterName("value")
+            .WithMessage("*must not be empty*");
     }
 
     [Theory]
@@ -74,7 +76,8 @@ public class PhoneNumberTests
 
         // Assert
         act.Should().Throw<ArgumentException>()
-            .WithMessage("*not a valid Egyptian phone number*");
+            .WithMessage("*is not a valid Egyptian phone number*")
+            .WithParameterName("value");
     }
 
     [Theory]
@@ -87,7 +90,8 @@ public class PhoneNumberTests
         var act = () => new PhoneNumber(formattedNumber);
 
         // Assert
-        act.Should().Throw<ArgumentException>();
+        act.Should().Throw<ArgumentException>()
+            .WithMessage("*is not a valid Egyptian phone number*");
     }
 
     #endregion
@@ -145,13 +149,14 @@ public class PhoneNumberTests
     [InlineData("+201212345678", "Orange")]     // 012 - Orange
     [InlineData("+201512345678", "WE")]         // 015 - WE
     public void Constructor_WithDifferentProviderPrefixes_ShouldAllBeValid(
-        string number, string _provider)
+        string number, string provider)
     {
         // Arrange & Act
         var phone = new PhoneNumber(number);
 
         // Assert
         phone.Value.Should().Be(number);
+        phone.Should().NotBeNull($"Phone number {number} for provider {provider} should be valid");
     }
 
     #endregion

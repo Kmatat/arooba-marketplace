@@ -13,7 +13,7 @@ public record GetConfigsQuery : IRequest<IReadOnlyList<ConfigDto>>
 
 public record ConfigDto
 {
-    public Guid Id { get; init; }
+    public int Id { get; init; }
     public string Key { get; init; } = string.Empty;
     public string Value { get; init; } = string.Empty;
     public ConfigCategory Category { get; init; }

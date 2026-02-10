@@ -1,8 +1,6 @@
 using Arooba.Application.Common.Models;
-using Arooba.Application.Features.Orders.Commands.CreateOrder;
-using Arooba.Application.Features.Orders.Commands.UpdateOrderStatus;
-using Arooba.Application.Features.Orders.Queries.GetOrderById;
-using Arooba.Application.Features.Orders.Queries.GetOrders;
+using Arooba.Application.Features.Orders.Commands;
+using Arooba.Application.Features.Orders.Queries;
 using Arooba.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -34,8 +32,8 @@ public class OrdersController : ApiControllerBase
     [ProducesResponseType(typeof(PaginatedList<OrderDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetOrders(
         [FromQuery] OrderStatus? status,
-        [FromQuery] Guid? customerId,
-        [FromQuery] Guid? vendorId,
+        [FromQuery] int? customerId,
+        [FromQuery] int? vendorId,
         [FromQuery] DateTime? from,
         [FromQuery] DateTime? to,
         [FromQuery] int pageNumber = 1,
@@ -47,8 +45,8 @@ public class OrdersController : ApiControllerBase
             Status = status,
             CustomerId = customerId,
             VendorId = vendorId,
-            From = from,
-            To = to,
+            DateFrom= from,
+            DateTo= to,
             PageNumber = pageNumber,
             PageSize = pageSize
         };
@@ -76,14 +74,14 @@ public class OrdersController : ApiControllerBase
     /// <returns>The order detail including items, shipments, and financial breakdown.</returns>
     /// <response code="200">Order found and returned.</response>
     /// <response code="404">Order with the specified identifier was not found.</response>
-    [HttpGet("{id:guid}")]
+    [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(OrderDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetOrder(
-        Guid id,
+        int id,
         CancellationToken cancellationToken)
     {
-        var result = await Sender.Send(new GetOrderByIdQuery(id), cancellationToken);
+        var result = await Sender.Send(new GetOrderByIdQuery() { OrderId = id }, cancellationToken);
         return Ok(result);
     }
 
@@ -109,7 +107,7 @@ public class OrdersController : ApiControllerBase
     /// <response code="201">Order created successfully.</response>
     /// <response code="400">Validation failed (e.g., out-of-stock items, invalid address zone).</response>
     [HttpPost]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateOrder(
         [FromBody] CreateOrderCommand command,
@@ -136,16 +134,16 @@ public class OrdersController : ApiControllerBase
     /// <response code="204">Order status updated successfully.</response>
     /// <response code="400">Invalid status transition.</response>
     /// <response code="404">Order with the specified identifier was not found.</response>
-    [HttpPatch("{id:guid}/status")]
+    [HttpPatch("{id:int}/status")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateOrderStatus(
-        Guid id,
+        int id,
         [FromBody] UpdateOrderStatusCommand command,
         CancellationToken cancellationToken)
     {
-        if (id != command.Id)
+        if (id != command.OrderId)
         {
             return BadRequest(new ProblemDetails
             {

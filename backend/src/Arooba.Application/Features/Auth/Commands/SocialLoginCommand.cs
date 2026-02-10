@@ -33,7 +33,7 @@ public record SocialLoginCommand : IRequest<SocialLoginResultDto>
 public record SocialLoginResultDto
 {
     /// <summary>The user's ID.</summary>
-    public Guid UserId { get; init; }
+    public int UserId { get; init; }
 
     /// <summary>The JWT access token.</summary>
     public string Token { get; init; } = default!;
@@ -136,7 +136,7 @@ public class SocialLoginCommandHandler : IRequestHandler<SocialLoginCommand, Soc
                     "Please login with your existing account or use a different number.");
             }
 
-            var userId = Guid.NewGuid();
+            var userId = new int();
             var fullName = socialResult.FullName ?? request.FullName ?? "User";
 
             user = new User
@@ -158,7 +158,7 @@ public class SocialLoginCommandHandler : IRequestHandler<SocialLoginCommand, Soc
             // Create customer record
             var customer = new Customer
             {
-                Id = Guid.NewGuid(),
+                Id = new int(),
                 UserId = userId,
                 FullName = fullName,
                 MobileNumber = request.MobileNumber,

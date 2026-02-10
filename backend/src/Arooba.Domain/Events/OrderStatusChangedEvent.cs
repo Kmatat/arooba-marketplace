@@ -11,6 +11,6 @@ namespace Arooba.Domain.Events;
 /// <param name="OldStatus">The previous order status.</param>
 /// <param name="NewStatus">The new order status.</param>
 public sealed record OrderStatusChangedEvent(
-    Guid OrderId,
+    int OrderId,
     OrderStatus OldStatus,
     OrderStatus NewStatus) : IDomainEvent;

@@ -2,6 +2,7 @@ using Arooba.Application.Features.Vendors.Commands;
 using Arooba.Domain.Enums;
 using FluentAssertions;
 using FluentValidation.TestHelper;
+using Xunit;
 
 namespace Arooba.Application.Tests.Validators;
 
@@ -26,47 +27,47 @@ public class CreateVendorCommandValidatorTests
 
     #endregion
 
-    #region BusinessNameAr
+    #region BusinessName
 
     [Fact]
-    public void Validate_EmptyBusinessNameAr_ShouldHaveError()
+    public void Validate_EmptyBusinessName_ShouldHaveError()
     {
         // Arrange
-        var command = CreateValidCommand() with { BusinessNameAr = string.Empty };
+        var command = CreateValidCommand() with { BusinessName = string.Empty };
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(c => c.BusinessNameAr)
+        result.ShouldHaveValidationErrorFor(c => c.BusinessName)
             .WithErrorMessage("Arabic business name is required.");
     }
 
     [Fact]
-    public void Validate_BusinessNameAr_ExceedsMaxLength_ShouldHaveError()
+    public void Validate_BusinessName_ExceedsMaxLength_ShouldHaveError()
     {
         // Arrange
-        var command = CreateValidCommand() with { BusinessNameAr = new string('ا', 201) };
+        var command = CreateValidCommand() with { BusinessName = new string('ا', 201) };
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(c => c.BusinessNameAr)
+        result.ShouldHaveValidationErrorFor(c => c.BusinessName)
             .WithErrorMessage("Arabic business name must not exceed 200 characters.");
     }
 
     [Fact]
-    public void Validate_BusinessNameAr_ExactlyMaxLength_ShouldBeValid()
+    public void Validate_BusinessName_ExactlyMaxLength_ShouldBeValid()
     {
         // Arrange
-        var command = CreateValidCommand() with { BusinessNameAr = new string('ا', 200) };
+        var command = CreateValidCommand() with { BusinessName = new string('ا', 200) };
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldNotHaveValidationErrorFor(c => c.BusinessNameAr);
+        result.ShouldNotHaveValidationErrorFor(c => c.BusinessName);
     }
 
     #endregion
@@ -345,7 +346,7 @@ public class CreateVendorCommandValidatorTests
         // Arrange
         var command = new CreateVendorCommand
         {
-            BusinessNameAr = string.Empty,
+            BusinessName = string.Empty,
             BusinessNameEn = string.Empty,
             PhoneNumber = string.Empty,
             Email = string.Empty,
@@ -358,7 +359,7 @@ public class CreateVendorCommandValidatorTests
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(c => c.BusinessNameAr);
+        result.ShouldHaveValidationErrorFor(c => c.BusinessName);
         result.ShouldHaveValidationErrorFor(c => c.BusinessNameEn);
         result.ShouldHaveValidationErrorFor(c => c.PhoneNumber);
         result.ShouldHaveValidationErrorFor(c => c.Email);
@@ -375,7 +376,7 @@ public class CreateVendorCommandValidatorTests
     {
         return new CreateVendorCommand
         {
-            BusinessNameAr = "متجر عروبة للحرف اليدوية",
+            BusinessName = "متجر عروبة للحرف اليدوية",
             BusinessNameEn = "Arooba Crafts Store",
             PhoneNumber = "+201012345678",
             Email = "vendor@arooba.eg",

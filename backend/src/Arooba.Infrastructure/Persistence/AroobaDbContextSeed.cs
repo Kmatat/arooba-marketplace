@@ -168,9 +168,9 @@ public static class AroobaDbContextSeed
         {
             new()
             {
-                Id = "jewelry-accessories",
+                Id = 1,
+                Name = "\u0645\u062c\u0648\u0647\u0631\u0627\u062a \u0648\u0625\u0643\u0633\u0633\u0648\u0627\u0631\u0627\u062a",
                 NameEn = "Jewelry & Accessories",
-                NameAr = "\u0645\u062c\u0648\u0647\u0631\u0627\u062a \u0648\u0625\u0643\u0633\u0633\u0648\u0627\u0631\u0627\u062a",
                 Icon = "\ud83d\udc8d",
                 MinUpliftRate = 0.15m,
                 MaxUpliftRate = 0.18m,
@@ -179,9 +179,9 @@ public static class AroobaDbContextSeed
             },
             new()
             {
-                Id = "fashion-apparel",
+                Id = 2,
+                Name = "\u0623\u0632\u064a\u0627\u0621 \u0648\u0645\u0644\u0627\u0628\u0633",
                 NameEn = "Fashion & Apparel",
-                NameAr = "\u0623\u0632\u064a\u0627\u0621 \u0648\u0645\u0644\u0627\u0628\u0633",
                 Icon = "\ud83d\udc57",
                 MinUpliftRate = 0.22m,
                 MaxUpliftRate = 0.25m,
@@ -190,9 +190,9 @@ public static class AroobaDbContextSeed
             },
             new()
             {
-                Id = "home-decor-fragile",
+                Id = 3,
+                Name = "\u062f\u064a\u0643\u0648\u0631 (\u0647\u0634)",
                 NameEn = "Home Decor (Fragile)",
-                NameAr = "\u062f\u064a\u0643\u0648\u0631 (\u0647\u0634)",
                 Icon = "\ud83c\udffa",
                 MinUpliftRate = 0.25m,
                 MaxUpliftRate = 0.30m,
@@ -201,9 +201,9 @@ public static class AroobaDbContextSeed
             },
             new()
             {
-                Id = "home-decor-textiles",
+                Id = 4,
+                Name = "\u062f\u064a\u0643\u0648\u0631 (\u0645\u0646\u0633\u0648\u062c\u0627\u062a)",
                 NameEn = "Home Decor (Textiles)",
-                NameAr = "\u062f\u064a\u0643\u0648\u0631 (\u0645\u0646\u0633\u0648\u062c\u0627\u062a)",
                 Icon = "\ud83e\uddf6",
                 MinUpliftRate = 0.20m,
                 MaxUpliftRate = 0.20m,
@@ -212,9 +212,9 @@ public static class AroobaDbContextSeed
             },
             new()
             {
-                Id = "leather-goods",
+                Id = 5,
+                Name = "\u0645\u0646\u062a\u062c\u0627\u062a \u062c\u0644\u062f\u064a\u0629",
                 NameEn = "Leather Goods",
-                NameAr = "\u0645\u0646\u062a\u062c\u0627\u062a \u062c\u0644\u062f\u064a\u0629",
                 Icon = "\ud83d\udc5c",
                 MinUpliftRate = 0.20m,
                 MaxUpliftRate = 0.20m,
@@ -223,9 +223,9 @@ public static class AroobaDbContextSeed
             },
             new()
             {
-                Id = "beauty-personal",
+                Id = 6,
+                Name = "\u062c\u0645\u0627\u0644 \u0648\u0639\u0646\u0627\u064a\u0629 \u0634\u062e\u0635\u064a\u0629",
                 NameEn = "Beauty & Personal Care",
-                NameAr = "\u062c\u0645\u0627\u0644 \u0648\u0639\u0646\u0627\u064a\u0629 \u0634\u062e\u0635\u064a\u0629",
                 Icon = "\ud83e\uddf4",
                 MinUpliftRate = 0.20m,
                 MaxUpliftRate = 0.20m,
@@ -234,9 +234,9 @@ public static class AroobaDbContextSeed
             },
             new()
             {
-                Id = "furniture-woodwork",
+                Id = 7,
+                Name = "\u0623\u062b\u0627\u062b \u0648\u0623\u0639\u0645\u0627\u0644 \u062e\u0634\u0628\u064a\u0629",
                 NameEn = "Furniture & Woodwork",
-                NameAr = "\u0623\u062b\u0627\u062b \u0648\u0623\u0639\u0645\u0627\u0644 \u062e\u0634\u0628\u064a\u0629",
                 Icon = "\ud83e\ude91",
                 MinUpliftRate = 0.15m,
                 MaxUpliftRate = 0.15m,
@@ -245,9 +245,9 @@ public static class AroobaDbContextSeed
             },
             new()
             {
-                Id = "food-essentials",
+                Id = 8,
+                Name = "\u0623\u063a\u0631\u064a\u0629 \u0648\u0645\u0633\u062a\u0644\u0632\u0645\u0627\u062a",
                 NameEn = "Food & Essentials",
-                NameAr = "\u0623\u063a\u0630\u064a\u0629 \u0648\u0645\u0633\u062a\u0644\u0632\u0645\u0627\u062a",
                 Icon = "\ud83c\udf5a",
                 MinUpliftRate = 0.10m,
                 MaxUpliftRate = 0.15m,
@@ -328,9 +328,9 @@ public static class AroobaDbContextSeed
             [("sinai", "canal")] = (60m, 18m),
         };
 
-        var rateCards = rateData.Select(kvp => new RateCard
+        var rateCards = rateData.Select((kvp, index) => new RateCard
         {
-            Id = Guid.NewGuid(),
+            Id = index + 1,
             FromZoneId = kvp.Key.From,
             ToZoneId = kvp.Key.To,
             BasePrice = kvp.Value.BasePrice,
@@ -343,13 +343,13 @@ public static class AroobaDbContextSeed
 
     /// <summary>
     /// Seeds a super admin user account for initial platform access.
-    /// Uses a well-known GUID so this seed is idempotent.
+    /// Uses a well-known int so this seed is idempotent.
     /// </summary>
     /// <param name="context">The database context.</param>
     /// <param name="logger">The logger.</param>
     private static async Task SeedSuperAdminAsync(AroobaDbContext context, ILogger logger)
     {
-        var superAdminId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+        const int superAdminId = 1;
 
         if (await context.Users.AnyAsync(u => u.Id == superAdminId))
         {
@@ -363,7 +363,7 @@ public static class AroobaDbContextSeed
             MobileNumber = "+201000000001",
             Email = "admin@aroobh.com",
             FullName = "Arooba Super Admin",
-            FullNameAr = "\u0645\u0633\u0624\u0648\u0644 \u0623\u0631\u0648\u0628\u0629 \u0627\u0644\u0631\u0626\u064a\u0633\u064a",
+            FullNameAr = "\u0645\u0633\u0626\u0648\u0644 \u0623\u0631\u0648\u0628\u0629 \u0627\u0644\u0631\u0626\u064a\u0633\u064a",
             Role = UserRole.AdminSuper,
             IsVerified = true,
             CreatedAt = DateTime.UtcNow,

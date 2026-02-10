@@ -1,8 +1,8 @@
 namespace Arooba.Application.Features.Products.Queries;
 
-public record ProductDetailDto
+public record ProductDetailDto_v2
 {
-    public Guid Id { get; init; }
+    public int Id { get; init; }
     public string Name { get; init; } = string.Empty;
     public string? Description { get; init; }
     public decimal VendorBasePrice { get; init; }

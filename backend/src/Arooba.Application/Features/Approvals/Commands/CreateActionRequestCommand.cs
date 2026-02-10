@@ -7,12 +7,12 @@ namespace Arooba.Application.Features.Approvals.Commands;
 /// <summary>
 /// Creates a new vendor action request requiring admin approval.
 /// </summary>
-public record CreateActionRequestCommand : IRequest<Guid>
+public record CreateActionRequestCommand : IRequest<int>
 {
-    public Guid VendorId { get; init; }
+    public int VendorId { get; init; }
     public VendorActionType ActionType { get; init; }
     public string EntityType { get; init; } = string.Empty;
-    public Guid? EntityId { get; init; }
+    public int? EntityId { get; init; }
     public string? CurrentValues { get; init; }
     public string? ProposedValues { get; init; }
     public string? Justification { get; init; }

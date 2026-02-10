@@ -5,7 +5,7 @@ namespace Arooba.Domain.Entities;
 /// <summary>Represents a pickup location for a vendor in the Arooba Marketplace domain.</summary>
 public class PickupLocation : AuditableEntity
 {
-    public Guid VendorId { get; set; }
+    public int VendorId { get; set; }
     public string Label { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;

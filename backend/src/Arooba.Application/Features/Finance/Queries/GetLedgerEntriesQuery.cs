@@ -12,7 +12,7 @@ namespace Arooba.Application.Features.Finance.Queries;
 public record GetLedgerEntriesQuery : IRequest<PaginatedList<LedgerEntryDto>>
 {
     /// <summary>Gets the vendor identifier.</summary>
-    public Guid VendorId { get; init; }
+    public int VendorId { get; init; }
 
     /// <summary>Gets the page number (1-based). Defaults to 1.</summary>
     public int PageNumber { get; init; } = 1;
@@ -39,13 +39,13 @@ public record GetLedgerEntriesQuery : IRequest<PaginatedList<LedgerEntryDto>>
 public record LedgerEntryDto
 {
     /// <summary>Gets the ledger entry identifier.</summary>
-    public Guid Id { get; init; }
+    public int Id { get; init; }
 
     /// <summary>Gets the vendor identifier.</summary>
-    public Guid ParentVendorId { get; init; }
+    public int ParentVendorId { get; init; }
 
     /// <summary>Gets the related order identifier, if applicable.</summary>
-    public Guid? OrderId { get; init; }
+    public int? OrderId { get; init; }
 
     /// <summary>Gets the transaction type.</summary>
     public TransactionType TransactionType { get; init; }

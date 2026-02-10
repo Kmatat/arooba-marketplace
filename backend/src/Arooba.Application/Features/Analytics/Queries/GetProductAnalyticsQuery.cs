@@ -18,10 +18,10 @@ public record GetProductAnalyticsQuery : IRequest<ProductAnalyticsResultDto>
 
 public record ProductAnalyticsItemDto
 {
-    public Guid ProductId { get; init; }
+    public int ProductId { get; init; }
     public string ProductTitle { get; init; } = string.Empty;
     public string ProductTitleAr { get; init; } = string.Empty;
-    public string CategoryId { get; init; } = string.Empty;
+    public int CategoryId { get; init; } 
     public int Views { get; init; }
     public int AddedToCart { get; init; }
     public int Purchases { get; init; }
@@ -97,7 +97,7 @@ public class GetProductAnalyticsQueryHandler : IRequestHandler<GetProductAnalyti
                     ProductId = g.ProductId,
                     ProductTitle = product?.Title ?? "Unknown",
                     ProductTitleAr = product?.TitleAr ?? "",
-                    CategoryId = product?.CategoryId ?? "",
+                    CategoryId = product?.CategoryId ?? 0,
                     Views = g.Views,
                     AddedToCart = g.CartAdds,
                     Purchases = g.Purchases,

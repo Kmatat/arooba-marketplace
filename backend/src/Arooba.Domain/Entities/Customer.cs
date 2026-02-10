@@ -6,7 +6,7 @@ namespace Arooba.Domain.Entities;
 /// <summary>Represents a Customer in the Arooba Marketplace domain.</summary>
 public class Customer : AuditableEntity
 {
-    public Guid UserId { get; set; }
+    public int UserId { get; set; }
     public string FullName { get; set; } = string.Empty;
     public string FullNameAr { get; set; } = string.Empty;
 
@@ -78,4 +78,6 @@ public class Customer : AuditableEntity
 
     /// <summary>Navigation property to the customer's login history.</summary>
     public List<CustomerLoginHistory>? LoginHistory { get; set; }
+
+    public virtual ICollection<Subscription>? Subscriptions { get; set; }
 }

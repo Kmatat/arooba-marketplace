@@ -9,7 +9,7 @@ public abstract class BaseEntity
     /// <summary>
     /// Gets or sets the unique identifier for this entity.
     /// </summary>
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
     /// <summary>
     /// Gets or sets the UTC timestamp when this entity was created.

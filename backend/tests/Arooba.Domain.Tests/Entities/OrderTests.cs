@@ -437,7 +437,7 @@ public class OrderTests
         return new Order
         {
             OrderNumber = "ORD-001",
-            CustomerId = Guid.NewGuid(),
+            CustomerId = new int(),
             Status = status,
             TotalAmount = 500m,
             ShippingFee = 30m,

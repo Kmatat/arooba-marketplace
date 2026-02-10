@@ -14,7 +14,7 @@ namespace Arooba.Application.Features.Orders.Commands;
 public record OrderItemRequest
 {
     /// <summary>Gets the product identifier to order.</summary>
-    public Guid ProductId { get; init; }
+    public int ProductId { get; init; }
 
     /// <summary>Gets the quantity to order.</summary>
     public int Quantity { get; init; }
@@ -26,10 +26,10 @@ public record OrderItemRequest
 /// calculates the 5-bucket financial split for each line item,
 /// groups items into shipments by pickup location, and persists the complete order.
 /// </summary>
-public record CreateOrderCommand : IRequest<Guid>
+public record CreateOrderCommand : IRequest<int>
 {
     /// <summary>Gets the customer placing the order.</summary>
-    public Guid CustomerId { get; init; }
+    public int CustomerId { get; init; }
 
     /// <summary>Gets the list of products and quantities to order.</summary>
     public List<OrderItemRequest> Items { get; init; } = new();
@@ -51,7 +51,7 @@ public record CreateOrderCommand : IRequest<Guid>
 /// Handles the complete order creation workflow including stock validation,
 /// 5-bucket pricing split, shipment grouping, and financial record creation.
 /// </summary>
-public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Guid>
+public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, int>
 {
     private readonly IApplicationDbContext _context;
     private readonly IDateTimeService _dateTime;
@@ -83,7 +83,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Gui
     /// <returns>The unique identifier of the newly created order.</returns>
     /// <exception cref="NotFoundException">Thrown when customer, product, or zone is not found.</exception>
     /// <exception cref="BadRequestException">Thrown when stock is insufficient or product is unavailable.</exception>
-    public async Task<Guid> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
+    public async Task<int> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
         var now = _dateTime.UtcNow;
 
@@ -153,7 +153,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Gui
         }
 
         // Step 4: Create the order
-        var orderId = Guid.NewGuid();
+        var orderId = new int();
         var orderNumber = GenerateOrderNumber(now);
 
         var order = new Order
@@ -180,7 +180,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Gui
         foreach (var itemRequest in request.Items)
         {
             var product = products.First(p => p.Id == itemRequest.ProductId);
-            var orderItemId = Guid.NewGuid();
+            var orderItemId = new int();
 
             var itemTotalPrice = product.FinalPrice * itemRequest.Quantity;
             var itemVendorPayout = product.VendorNetPayout * itemRequest.Quantity;
@@ -197,7 +197,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Gui
                 ProductTitle = product.Title,
                 ProductSku = product.Sku,
                 ProductImage = product.Images?.FirstOrDefault(),
-                VendorName = product.ParentVendor?.BusinessNameAr ?? string.Empty,
+                VendorName = product.ParentVendor?.BusinessName ?? string.Empty,
                 Quantity = itemRequest.Quantity,
                 UnitPrice = product.FinalPrice,
                 TotalPrice = itemTotalPrice,
@@ -218,7 +218,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Gui
             // Create 5-bucket transaction split for this item
             var split = new TransactionSplit
             {
-                Id = Guid.NewGuid(),
+                Id = new int(),
                 OrderId = orderId,
                 OrderItemId = orderItemId,
                 ProductId = product.Id,
@@ -254,14 +254,14 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Gui
 
         foreach (var group in shipmentGroups)
         {
-            var shipmentId = Guid.NewGuid();
+            var shipmentId = new int();
             var shipmentItems = group.ToList();
 
             var shipment = new Shipment
             {
                 Id = shipmentId,
                 OrderId = orderId,
-                PickupLocationId = group.Key ?? Guid.Empty,
+                PickupLocationId = group.Key ?? 0,
                 Status = ShipmentStatus.Pending,
                 TrackingNumber = GenerateTrackingNumber(now, shipments.Count + 1),
                 TotalWeight = shipmentItems.Sum(oi =>
@@ -302,7 +302,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Gui
             // Record ledger entries for each vendor
             var ledgerEntry = new LedgerEntry
             {
-                Id = Guid.NewGuid(),
+                Id = new int(),
                 ParentVendorId = vendorGroup.Key,
                 OrderId = orderId,
                 TransactionType = TransactionType.Sale,
@@ -348,7 +348,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Gui
     private static string GenerateOrderNumber(DateTime date)
     {
         var datePart = date.ToString("yyyyMMdd");
-        var randomPart = Guid.NewGuid().ToString("N")[..6].ToUpperInvariant();
+        var randomPart = new int().ToString("N")[..6].ToUpperInvariant();
         return $"ARB-{datePart}-{randomPart}";
     }
 
@@ -359,7 +359,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Gui
     private static string GenerateTrackingNumber(DateTime date, int sequence)
     {
         var datePart = date.ToString("yyyyMMdd");
-        var randomPart = Guid.NewGuid().ToString("N")[..4].ToUpperInvariant();
+        var randomPart = new int().ToString("N")[..4].ToUpperInvariant();
         return $"TRK-{datePart}-{randomPart}-{sequence:D2}";
     }
 }

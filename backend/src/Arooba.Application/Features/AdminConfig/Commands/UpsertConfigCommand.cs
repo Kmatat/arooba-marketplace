@@ -7,9 +7,9 @@ namespace Arooba.Application.Features.AdminConfig.Commands;
 /// <summary>
 /// Creates or updates a platform configuration entry.
 /// </summary>
-public record UpsertConfigCommand : IRequest<Guid>
+public record UpsertConfigCommand : IRequest<int>
 {
-    public Guid? Id { get; init; }
+    public int? Id { get; init; }
     public string Key { get; init; } = string.Empty;
     public string Value { get; init; } = string.Empty;
     public ConfigCategory Category { get; init; }

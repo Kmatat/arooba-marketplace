@@ -17,7 +17,7 @@ public class GenericRepository<T>(AroobaDbContext context) : IRepository<T> wher
     private readonly DbSet<T> _dbSet = context.Set<T>();
 
     /// <inheritdoc />
-    public async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         return await _dbSet.FindAsync([id], cancellationToken);
     }

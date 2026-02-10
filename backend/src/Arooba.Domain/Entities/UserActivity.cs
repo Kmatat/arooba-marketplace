@@ -10,7 +10,7 @@ namespace Arooba.Domain.Entities;
 public class UserActivity : BaseEntity
 {
     /// <summary>The user who performed the action.</summary>
-    public Guid UserId { get; set; }
+    public int UserId { get; set; }
 
     /// <summary>Navigation property to the user.</summary>
     public User? User { get; set; }
@@ -19,7 +19,7 @@ public class UserActivity : BaseEntity
     public UserActivityAction Action { get; set; }
 
     /// <summary>The product involved (if applicable).</summary>
-    public Guid? ProductId { get; set; }
+    public int? ProductId { get; set; }
 
     /// <summary>Navigation property to the product.</summary>
     public Product? Product { get; set; }
@@ -28,7 +28,7 @@ public class UserActivity : BaseEntity
     public string? CategoryId { get; set; }
 
     /// <summary>The order involved (if applicable).</summary>
-    public Guid? OrderId { get; set; }
+    public int? OrderId { get; set; }
 
     /// <summary>Search query text (for ProductSearched actions).</summary>
     public string? SearchQuery { get; set; }

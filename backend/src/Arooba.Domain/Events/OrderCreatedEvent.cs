@@ -7,4 +7,4 @@ namespace Arooba.Domain.Events;
 /// Handlers may trigger notifications, inventory reservation, or analytics.
 /// </summary>
 /// <param name="OrderId">The unique identifier of the newly created order.</param>
-public sealed record OrderCreatedEvent(Guid OrderId) : IDomainEvent;
+public sealed record OrderCreatedEvent(int OrderId) : IDomainEvent;

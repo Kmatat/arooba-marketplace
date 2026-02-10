@@ -14,8 +14,8 @@ namespace Arooba.Infrastructure.Persistence;
 /// </summary>
 public class AroobaDbContext : DbContext, IAroobaDbContext, IApplicationDbContext
 {
-    private readonly Domain.Interfaces.IDateTimeService _dateTime;
-    private readonly Domain.Interfaces.ICurrentUserService _currentUser;
+    private readonly Application.Common.Interfaces.IDateTimeService _dateTime;
+    private readonly Application.Common.Interfaces.ICurrentUserService _currentUser;
 
     /// <summary>
     /// Initializes a new instance of <see cref="AroobaDbContext"/> with the specified options
@@ -26,8 +26,8 @@ public class AroobaDbContext : DbContext, IAroobaDbContext, IApplicationDbContex
     /// <param name="currentUser">The current user service for audit identity tracking.</param>
     public AroobaDbContext(
         DbContextOptions<AroobaDbContext> options,
-        Domain.Interfaces.IDateTimeService dateTime,
-        Domain.Interfaces.ICurrentUserService currentUser)
+        Application.Common.Interfaces.IDateTimeService dateTime,
+        Application.Common.Interfaces.ICurrentUserService currentUser)
         : base(options)
     {
         _dateTime = dateTime;
@@ -126,7 +126,7 @@ public class AroobaDbContext : DbContext, IAroobaDbContext, IApplicationDbContex
     /// <returns>The number of state entries written to the database.</returns>
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        var utcNow = _dateTime.Now;
+        var utcNow = _dateTime.UtcNow;
         var userId = _currentUser.UserId;
 
         foreach (var entry in ChangeTracker.Entries<BaseEntity>())

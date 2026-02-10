@@ -2,7 +2,6 @@ using Arooba.Application.Common.Exceptions;
 using Arooba.Application.Common.Interfaces;
 using Arooba.Domain.Entities;
 using Arooba.Domain.Enums;
-using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,7 +13,7 @@ namespace Arooba.Application.Features.Customers.Queries;
 public record GetCustomerByIdQuery : IRequest<CustomerDetailDto>
 {
     /// <summary>Gets the customer identifier.</summary>
-    public Guid CustomerId { get; init; }
+    public int CustomerId { get; init; }
 }
 
 /// <summary>
@@ -23,40 +22,22 @@ public record GetCustomerByIdQuery : IRequest<CustomerDetailDto>
 public record CustomerAddressDto
 {
     /// <summary>Gets the address identifier.</summary>
-    public Guid Id { get; init; }
+    public int Id { get; init; }
 
     /// <summary>Gets the address label.</summary>
     public string Label { get; init; } = default!;
 
-    /// <summary>Gets the street address.</summary>
-    public string StreetAddress { get; init; } = default!;
-
-    /// <summary>Gets the apartment number.</summary>
-    public string? ApartmentNumber { get; init; }
-
-    /// <summary>Gets the floor.</summary>
-    public string? Floor { get; init; }
-
-    /// <summary>Gets the district.</summary>
-    public string District { get; init; } = default!;
+    /// <summary>Gets the full address.</summary>
+    public string FullAddress { get; init; } = default!;
 
     /// <summary>Gets the city.</summary>
     public string City { get; init; } = default!;
 
-    /// <summary>Gets the governorate.</summary>
-    public string Governorate { get; init; } = default!;
-
-    /// <summary>Gets the postal code.</summary>
-    public string? PostalCode { get; init; }
-
     /// <summary>Gets the shipping zone identifier.</summary>
-    public Guid ShippingZoneId { get; init; }
+    public string ZoneId { get; init; } = default!;
 
     /// <summary>Gets whether this is the default address.</summary>
     public bool IsDefault { get; init; }
-
-    /// <summary>Gets delivery notes.</summary>
-    public string? DeliveryNotes { get; init; }
 }
 
 /// <summary>
@@ -65,7 +46,7 @@ public record CustomerAddressDto
 public record CustomerOrderSummaryDto
 {
     /// <summary>Gets the order identifier.</summary>
-    public Guid Id { get; init; }
+    public int Id { get; init; }
 
     /// <summary>Gets the order number.</summary>
     public string OrderNumber { get; init; } = default!;
@@ -89,10 +70,10 @@ public record CustomerOrderSummaryDto
 public record CustomerDetailDto
 {
     /// <summary>Gets the customer identifier.</summary>
-    public Guid Id { get; init; }
+    public int Id { get; init; }
 
     /// <summary>Gets the associated user identifier.</summary>
-    public Guid UserId { get; init; }
+    public int UserId { get; init; }
 
     /// <summary>Gets the full name.</summary>
     public string FullName { get; init; } = default!;
@@ -131,17 +112,14 @@ public record CustomerDetailDto
 public class GetCustomerByIdQueryHandler : IRequestHandler<GetCustomerByIdQuery, CustomerDetailDto>
 {
     private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
 
     /// <summary>
     /// Initializes a new instance of <see cref="GetCustomerByIdQueryHandler"/>.
     /// </summary>
     /// <param name="context">The application database context.</param>
-    /// <param name="mapper">The AutoMapper instance.</param>
-    public GetCustomerByIdQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public GetCustomerByIdQueryHandler(IApplicationDbContext context)
     {
         _context = context;
-        _mapper = mapper;
     }
 
     /// <summary>
@@ -168,19 +146,13 @@ public class GetCustomerByIdQueryHandler : IRequestHandler<GetCustomerByIdQuery,
             .Where(a => a.CustomerId == request.CustomerId)
             .AsNoTracking()
             .Select(a => new CustomerAddressDto
-            {
+            {       
                 Id = a.Id,
                 Label = a.Label,
-                StreetAddress = a.StreetAddress,
-                ApartmentNumber = a.ApartmentNumber,
-                Floor = a.Floor,
-                District = a.District,
+                FullAddress = a.FullAddress,
                 City = a.City,
-                Governorate = a.Governorate,
-                PostalCode = a.PostalCode,
-                ShippingZoneId = a.ShippingZoneId,
-                IsDefault = a.IsDefault,
-                DeliveryNotes = a.DeliveryNotes
+                ZoneId = a.ZoneId,
+                IsDefault = a.IsDefault
             })
             .ToListAsync(cancellationToken);
 
@@ -195,7 +167,7 @@ public class GetCustomerByIdQueryHandler : IRequestHandler<GetCustomerByIdQuery,
                 OrderNumber = o.OrderNumber,
                 Status = o.Status,
                 TotalAmount = o.TotalAmount,
-                ItemCount = o.OrderItems != null ? o.OrderItems.Sum(oi => oi.Quantity) : 0,
+                ItemCount = o.Items.Sum(oi => oi.Quantity),
                 CreatedAt = o.CreatedAt
             })
             .ToListAsync(cancellationToken);

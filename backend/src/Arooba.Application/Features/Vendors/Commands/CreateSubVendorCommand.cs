@@ -11,21 +11,21 @@ namespace Arooba.Application.Features.Vendors.Commands.CreateSubVendor;
 /// <summary>
 /// Command to register a new sub-vendor under a parent vendor.
 /// </summary>
-public record CreateSubVendorCommand : IRequest<Guid>
+public record CreateSubVendorCommand : IRequest<int>
 {
-    public string BusinessNameAr { get; init; } = string.Empty;
+    public string BusinessName { get; init; } = string.Empty;
     public string BusinessNameEn { get; init; } = string.Empty;
     public string PhoneNumber { get; init; } = string.Empty;
     public string Email { get; init; } = string.Empty;
     public string NationalId { get; init; } = string.Empty;
     public VendorType VendorType { get; init; }
-    public Guid ParentVendorId { get; init; }
+    public int ParentVendorId { get; init; }
 }
 
 /// <summary>
 /// Handles the creation of a new sub-vendor under a parent vendor.
 /// </summary>
-public class CreateSubVendorCommandHandler : IRequestHandler<CreateSubVendorCommand, Guid>
+public class CreateSubVendorCommandHandler : IRequestHandler<CreateSubVendorCommand, int>
 {
     private readonly IApplicationDbContext _context;
     private readonly IDateTimeService _dateTime;
@@ -36,7 +36,7 @@ public class CreateSubVendorCommandHandler : IRequestHandler<CreateSubVendorComm
         _dateTime = dateTime;
     }
 
-    public async Task<Guid> Handle(CreateSubVendorCommand request, CancellationToken cancellationToken)
+    public async Task<int> Handle(CreateSubVendorCommand request, CancellationToken cancellationToken)
     {
         var parentVendor = await _context.ParentVendors
             .FirstOrDefaultAsync(v => v.Id == request.ParentVendorId, cancellationToken);
@@ -48,7 +48,7 @@ public class CreateSubVendorCommandHandler : IRequestHandler<CreateSubVendorComm
 
         var subVendor = new SubVendor
         {
-            BusinessNameAr = request.BusinessNameAr,
+            BusinessName = request.BusinessName,
             BusinessNameEn = request.BusinessNameEn,
             PhoneNumber = request.PhoneNumber,
             Email = request.Email,
@@ -72,7 +72,7 @@ public class CreateSubVendorCommandValidator : AbstractValidator<CreateSubVendor
 {
     public CreateSubVendorCommandValidator()
     {
-        RuleFor(c => c.BusinessNameAr)
+        RuleFor(c => c.BusinessName)
             .NotEmpty().WithMessage("Arabic business name is required.")
             .MaximumLength(200);
 

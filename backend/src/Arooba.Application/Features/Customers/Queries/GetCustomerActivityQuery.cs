@@ -11,7 +11,7 @@ namespace Arooba.Application.Features.Customers.Queries;
 public record GetCustomerActivityQuery : IRequest<List<CustomerActivityDto>>
 {
     /// <summary>Gets the customer identifier.</summary>
-    public Guid CustomerId { get; init; }
+    public int CustomerId { get; init; }
 
     /// <summary>Gets the maximum number of entries to return. Defaults to 50.</summary>
     public int Limit { get; init; } = 50;
@@ -25,13 +25,13 @@ public record GetCustomerActivityQuery : IRequest<List<CustomerActivityDto>>
 /// </summary>
 public record CustomerActivityDto
 {
-    public Guid Id { get; init; }
-    public Guid UserId { get; init; }
+    public int Id { get; init; }
+    public int UserId { get; init; }
     public string Action { get; init; } = default!;
-    public Guid? ProductId { get; init; }
+    public int? ProductId { get; init; }
     public string? ProductTitle { get; init; }
     public string? CategoryId { get; init; }
-    public Guid? OrderId { get; init; }
+    public int? OrderId { get; init; }
     public string? SearchQuery { get; init; }
     public string? Metadata { get; init; }
     public string? SessionId { get; init; }

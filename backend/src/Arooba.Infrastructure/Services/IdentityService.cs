@@ -35,6 +35,7 @@ public class IdentityService : IIdentityService
     public Task<Result<string>> CreateUserAsync(string userName, string password)
     {
         // Placeholder: in production, create the user in the identity store
+        // Return a string representation of a generated ID
         var newUserId = Guid.NewGuid().ToString();
         return Task.FromResult(Result.Success(newUserId));
     }

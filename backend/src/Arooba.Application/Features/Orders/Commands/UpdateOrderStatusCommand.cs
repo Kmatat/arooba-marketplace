@@ -15,13 +15,13 @@ namespace Arooba.Application.Features.Orders.Commands;
 public record UpdateOrderStatusCommand : IRequest<bool>
 {
     /// <summary>Gets the order identifier.</summary>
-    public Guid OrderId { get; init; }
+    public int OrderId { get; init; }
 
     /// <summary>Gets the optional shipment identifier (if updating a specific shipment).</summary>
-    public Guid? ShipmentId { get; init; }
+    public int? ShipmentId { get; init; }
 
     /// <summary>Gets the new status to apply.</summary>
-    public OrderStatus NewStatus { get; init; }
+    public ShipmentStatus NewStatus { get; init; }
 
     /// <summary>Gets an optional note about the status change.</summary>
     public string? Note { get; init; }
@@ -81,26 +81,26 @@ public class UpdateOrderStatusCommandHandler : IRequestHandler<UpdateOrderStatus
                 throw new NotFoundException(nameof(Shipment), request.ShipmentId.Value);
             }
 
-            ValidateStatusTransition(shipment.Status, request.NewStatus);
+            ValidateStatusTransition((OrderStatus)shipment.Status, (OrderStatus)request.NewStatus);
 
             shipment.Status = request.NewStatus;
             shipment.UpdatedAt = now;
 
             // On delivery, release pending funds to available balance for items in this shipment
-            if (request.NewStatus == OrderStatus.Delivered)
+            if (request.NewStatus == ShipmentStatus.Delivered)
             {
                 await ReleaseFundsForShipmentAsync(order, shipment, now, cancellationToken);
                 shipment.DeliveredAt = now;
             }
 
             // On return, reverse funds and restore stock
-            if (request.NewStatus == OrderStatus.Returned)
+            if (request.NewStatus == ShipmentStatus.Returned)
             {
                 await ReverseFundsForShipmentAsync(order, shipment, now, cancellationToken);
             }
 
             // Check if all shipments are delivered/completed to update order status
-            if (order.Shipments!.All(s => s.Status == OrderStatus.Delivered))
+            if (order.Shipments!.All(s => s.Status == ShipmentStatus.Delivered))
             {
                 order.Status = OrderStatus.Delivered;
                 order.DeliveredAt = now;
@@ -109,11 +109,11 @@ public class UpdateOrderStatusCommandHandler : IRequestHandler<UpdateOrderStatus
         else
         {
             // Updating the entire order status
-            ValidateStatusTransition(order.Status, request.NewStatus);
+            ValidateStatusTransition(order.Status, (OrderStatus)request.NewStatus);
 
-            order.Status = request.NewStatus;
+            order.Status = (OrderStatus)request.NewStatus;
 
-            if (request.NewStatus == OrderStatus.Cancelled)
+            if ((OrderStatus)request.NewStatus == OrderStatus.Cancelled)
             {
                 await HandleOrderCancellationAsync(order, now, cancellationToken);
             }
@@ -123,9 +123,9 @@ public class UpdateOrderStatusCommandHandler : IRequestHandler<UpdateOrderStatus
             {
                 foreach (var shipment in order.Shipments)
                 {
-                    if (shipment.Status != OrderStatus.Delivered && shipment.Status != OrderStatus.Returned)
+                    if (shipment.Status != ShipmentStatus.Delivered && shipment.Status != ShipmentStatus.Returned)
                     {
-                        shipment.Status = request.NewStatus;
+                        shipment.Status = (ShipmentStatus)request.NewStatus;
                         shipment.UpdatedAt = now;
                     }
                 }
@@ -194,7 +194,7 @@ public class UpdateOrderStatusCommandHandler : IRequestHandler<UpdateOrderStatus
             // Update ledger entry to available
             var ledgerEntry = new LedgerEntry
             {
-                Id = Guid.NewGuid(),
+                Id = new int(),
                 ParentVendorId = vendorGroup.Key,
                 OrderId = order.Id,
                 TransactionType = TransactionType.Sale,
@@ -251,7 +251,7 @@ public class UpdateOrderStatusCommandHandler : IRequestHandler<UpdateOrderStatus
             // Record refund ledger entry
             var ledgerEntry = new LedgerEntry
             {
-                Id = Guid.NewGuid(),
+                Id = new int(),
                 ParentVendorId = vendorGroup.Key,
                 OrderId = order.Id,
                 TransactionType = TransactionType.Refund,
@@ -307,7 +307,7 @@ public class UpdateOrderStatusCommandHandler : IRequestHandler<UpdateOrderStatus
 
             var ledgerEntry = new LedgerEntry
             {
-                Id = Guid.NewGuid(),
+                Id = new int(),
                 ParentVendorId = vendorGroup.Key,
                 OrderId = order.Id,
                 TransactionType = TransactionType.Refund,

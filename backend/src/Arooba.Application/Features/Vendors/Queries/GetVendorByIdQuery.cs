@@ -14,7 +14,7 @@ namespace Arooba.Application.Features.Vendors.Queries;
 public record GetVendorByIdQuery : IRequest<VendorDetailDto>
 {
     /// <summary>Gets the vendor identifier.</summary>
-    public Guid VendorId { get; init; }
+    public int VendorId { get; init; }
 }
 
 /// <summary>
@@ -23,13 +23,13 @@ public record GetVendorByIdQuery : IRequest<VendorDetailDto>
 public record SubVendorDto
 {
     /// <summary>Gets the sub-vendor identifier.</summary>
-    public Guid Id { get; init; }
+    public int Id { get; init; }
 
     /// <summary>Gets the business name.</summary>
-    public string BusinessName { get; init; } = default!;
+    //public string BusinessName { get; init; } = default!;
 
     /// <summary>Gets the Arabic business name.</summary>
-    public string BusinessNameAr { get; init; } = default!;
+    public string BusinessName { get; init; } = default!;
 
     /// <summary>Gets the mobile number.</summary>
     public string MobileNumber { get; init; } = default!;
@@ -59,16 +59,16 @@ public record SubVendorDto
 public record VendorDetailDto
 {
     /// <summary>Gets the vendor identifier.</summary>
-    public Guid Id { get; init; }
+    public int Id { get; init; }
 
     /// <summary>Gets the associated user identifier.</summary>
-    public Guid UserId { get; init; }
+    public int UserId { get; init; }
 
     /// <summary>Gets the business name.</summary>
     public string BusinessName { get; init; } = default!;
 
     /// <summary>Gets the Arabic business name.</summary>
-    public string BusinessNameAr { get; init; } = default!;
+    //public string BusinessName { get; init; } = default!;
 
     /// <summary>Gets the vendor type.</summary>
     public VendorType VendorType { get; init; }
@@ -189,17 +189,17 @@ public class GetVendorByIdQueryHandler : IRequestHandler<GetVendorByIdQuery, Ven
             Id = vendor.Id,
             UserId = vendor.UserId,
             BusinessName = vendor.BusinessName,
-            BusinessNameAr = vendor.BusinessNameAr,
+            //BusinessName = vendor.BusinessName,
             VendorType = vendor.VendorType,
             Status = vendor.Status,
-            MobileNumber = vendor.MobileNumber,
-            Email = vendor.Email,
-            CommercialRegNumber = vendor.CommercialRegNumber,
-            TaxId = vendor.TaxId,
-            IsVatRegistered = vendor.IsVatRegistered,
-            CommissionRate = vendor.CommissionRate,
-            BankName = vendor.BankName,
-            BankAccountNumber = vendor.BankAccountNumber,
+            //MobileNumber = vendor.MobileNumber,
+            //Email = vendor.Email,
+            //CommercialRegNumber = vendor.CommercialRegNumber,
+            //TaxId = vendor.TaxId,
+            //IsVatRegistered = vendor.IsVatRegistered,
+            //CommissionRate = vendor.CommissionRate,
+            //BankName = vendor.BankName,
+            //BankAccountNumber = vendor.BankAccountNumber,
             SubVendors = subVendorDtos,
             TotalProducts = totalProducts,
             TotalOrders = orderStats?.TotalOrders ?? 0,

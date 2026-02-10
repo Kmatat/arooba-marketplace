@@ -1,8 +1,6 @@
 using Arooba.Application.Common.Models;
-using Arooba.Application.Features.Finance.Commands.ProcessPayout;
-using Arooba.Application.Features.Finance.Queries.GetLedgerEntries;
-using Arooba.Application.Features.Finance.Queries.GetTransactionSplits;
-using Arooba.Application.Features.Finance.Queries.GetVendorWallet;
+using Arooba.Application.Features.Finance.Commands;
+using Arooba.Application.Features.Finance.Queries;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,14 +29,14 @@ public class FinanceController : ApiControllerBase
     /// <returns>The vendor wallet with balance breakdown.</returns>
     /// <response code="200">Wallet retrieved successfully.</response>
     /// <response code="404">Vendor with the specified identifier was not found.</response>
-    [HttpGet("wallets/{vendorId:guid}")]
+    [HttpGet("wallets/{vendorId:int}")]
     [ProducesResponseType(typeof(VendorWalletDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetVendorWallet(
-        Guid vendorId,
+        int vendorId,
         CancellationToken cancellationToken)
     {
-        var result = await Sender.Send(new GetVendorWalletQuery(vendorId), cancellationToken);
+        var result = await Sender.Send(new GetVendorWalletQuery() { VendorId = vendorId }, cancellationToken);
         return Ok(result);
     }
 
@@ -56,11 +54,11 @@ public class FinanceController : ApiControllerBase
     /// <returns>A paginated list of ledger entries ordered by date descending.</returns>
     /// <response code="200">Ledger entries retrieved successfully.</response>
     /// <response code="404">Vendor with the specified identifier was not found.</response>
-    [HttpGet("ledger/{vendorId:guid}")]
+    [HttpGet("ledger/{vendorId:int}")]
     [ProducesResponseType(typeof(PaginatedList<LedgerEntryDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetLedgerEntries(
-        Guid vendorId,
+        int vendorId,
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 20,
         CancellationToken cancellationToken = default)
@@ -94,14 +92,14 @@ public class FinanceController : ApiControllerBase
     /// <returns>A list of transaction splits, one per order item.</returns>
     /// <response code="200">Transaction splits retrieved successfully.</response>
     /// <response code="404">Order with the specified identifier was not found.</response>
-    [HttpGet("splits/{orderId:guid}")]
+    [HttpGet("splits/{orderId:int}")]
     [ProducesResponseType(typeof(IReadOnlyList<TransactionSplitDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetTransactionSplits(
-        Guid orderId,
+        int orderId,
         CancellationToken cancellationToken)
     {
-        var result = await Sender.Send(new GetTransactionSplitsQuery(orderId), cancellationToken);
+        var result = await Sender.Send(new GetTransactionSplitQuery() { OrderId = orderId}, cancellationToken);
         return Ok(result);
     }
 
@@ -124,7 +122,7 @@ public class FinanceController : ApiControllerBase
     /// <response code="400">Insufficient balance, below minimum threshold, or missing bank details.</response>
     /// <response code="404">Vendor with the specified identifier was not found.</response>
     [HttpPost("payouts")]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ProcessPayout(

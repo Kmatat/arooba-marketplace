@@ -11,7 +11,7 @@ namespace Arooba.Application.Features.Customers.Queries;
 public record GetCustomerReviewsQuery : IRequest<List<CustomerReviewDto>>
 {
     /// <summary>Gets the customer identifier.</summary>
-    public Guid CustomerId { get; init; }
+    public int CustomerId { get; init; }
 }
 
 /// <summary>
@@ -19,11 +19,11 @@ public record GetCustomerReviewsQuery : IRequest<List<CustomerReviewDto>>
 /// </summary>
 public record CustomerReviewDto
 {
-    public Guid Id { get; init; }
-    public Guid CustomerId { get; init; }
-    public Guid OrderId { get; init; }
+    public int Id { get; init; }
+    public int CustomerId { get; init; }
+    public int OrderId { get; init; }
     public string OrderNumber { get; init; } = default!;
-    public Guid ProductId { get; init; }
+    public int ProductId { get; init; }
     public string ProductTitle { get; init; } = default!;
     public string VendorName { get; init; } = default!;
     public int Rating { get; init; }
@@ -65,7 +65,7 @@ public class GetCustomerReviewsQueryHandler : IRequestHandler<GetCustomerReviews
                 ProductId = r.ProductId,
                 ProductTitle = r.Product != null ? r.Product.Title : "",
                 VendorName = r.Product != null && r.Product.ParentVendor != null
-                    ? r.Product.ParentVendor.BusinessNameAr
+                    ? r.Product.ParentVendor.BusinessName
                     : "",
                 Rating = r.Rating,
                 ReviewText = r.ReviewText,

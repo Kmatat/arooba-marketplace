@@ -5,7 +5,7 @@ namespace Arooba.Domain.Entities;
 /// <summary>Represents a customer address in the Arooba Marketplace domain.</summary>
 public class CustomerAddress : AuditableEntity
 {
-    public Guid CustomerId { get; set; }
+    public int CustomerId { get; set; }
     public string Label { get; set; } = string.Empty;
     public string FullAddress { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;

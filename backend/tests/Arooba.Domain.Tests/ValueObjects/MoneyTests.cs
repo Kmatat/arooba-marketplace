@@ -1,5 +1,6 @@
 using Arooba.Domain.ValueObjects;
 using FluentAssertions;
+using Xunit;
 
 namespace Arooba.Domain.Tests.ValueObjects;
 

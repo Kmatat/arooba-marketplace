@@ -1,7 +1,7 @@
 using Arooba.Application.Features.Products.Commands;
 using Arooba.Domain.Enums;
-using FluentAssertions;
 using FluentValidation.TestHelper;
+using Xunit;
 
 namespace Arooba.Application.Tests.Validators;
 
@@ -32,13 +32,13 @@ public class CreateProductCommandValidatorTests
     public void Validate_EmptyName_ShouldHaveError()
     {
         // Arrange
-        var command = CreateValidCommand() with { Name = string.Empty };
+        var command = CreateValidCommand() with { TitleAr = string.Empty };
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(c => c.Name)
+        result.ShouldHaveValidationErrorFor(c => c.TitleAr)
             .WithErrorMessage("Product name is required.");
     }
 
@@ -46,13 +46,13 @@ public class CreateProductCommandValidatorTests
     public void Validate_Name_ExceedsMaxLength_ShouldHaveError()
     {
         // Arrange
-        var command = CreateValidCommand() with { Name = new string('A', 201) };
+        var command = CreateValidCommand() with { TitleAr = new string('A', 201) };
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(c => c.Name)
+        result.ShouldHaveValidationErrorFor(c => c.TitleAr)
             .WithErrorMessage("Product name must not exceed 200 characters.");
     }
 
@@ -60,13 +60,13 @@ public class CreateProductCommandValidatorTests
     public void Validate_Name_ExactlyMaxLength_ShouldBeValid()
     {
         // Arrange
-        var command = CreateValidCommand() with { Name = new string('A', 200) };
+        var command = CreateValidCommand() with { TitleAr = new string('A', 200) };
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldNotHaveValidationErrorFor(c => c.Name);
+        result.ShouldNotHaveValidationErrorFor(c => c.TitleAr);
     }
 
     [Theory]
@@ -76,13 +76,13 @@ public class CreateProductCommandValidatorTests
     public void Validate_ValidNames_ShouldNotHaveError(string name)
     {
         // Arrange
-        var command = CreateValidCommand() with { Name = name };
+        var command = CreateValidCommand() with { TitleAr = name };
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldNotHaveValidationErrorFor(c => c.Name);
+        result.ShouldNotHaveValidationErrorFor(c => c.TitleAr);
     }
 
     #endregion
@@ -144,7 +144,7 @@ public class CreateProductCommandValidatorTests
 
     #endregion
 
-    #region VendorBasePrice
+    #region SellingPrice
 
     [Theory]
     [InlineData(0)]
@@ -153,13 +153,13 @@ public class CreateProductCommandValidatorTests
     public void Validate_ZeroOrNegativePrice_ShouldHaveError(decimal price)
     {
         // Arrange
-        var command = CreateValidCommand() with { VendorBasePrice = price };
+        var command = CreateValidCommand() with { SellingPrice = price };
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(c => c.VendorBasePrice)
+        result.ShouldHaveValidationErrorFor(c => c.SellingPrice)
             .WithErrorMessage("Vendor base price must be greater than zero.");
     }
 
@@ -171,13 +171,13 @@ public class CreateProductCommandValidatorTests
     public void Validate_PositivePrice_ShouldNotHaveError(decimal price)
     {
         // Arrange
-        var command = CreateValidCommand() with { VendorBasePrice = price };
+        var command = CreateValidCommand() with { SellingPrice = price };
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldNotHaveValidationErrorFor(c => c.VendorBasePrice);
+        result.ShouldNotHaveValidationErrorFor(c => c.SellingPrice);
     }
 
     #endregion
@@ -188,7 +188,7 @@ public class CreateProductCommandValidatorTests
     public void Validate_EmptyCategoryId_ShouldHaveError()
     {
         // Arrange
-        var command = CreateValidCommand() with { CategoryId = string.Empty };
+        var command = CreateValidCommand() with { CategoryId = 1 };
 
         // Act
         var result = _validator.TestValidate(command);
@@ -199,11 +199,11 @@ public class CreateProductCommandValidatorTests
     }
 
     [Theory]
-    [InlineData("jewelry-accessories")]
-    [InlineData("home-decor-fragile")]
-    [InlineData("beauty-personal")]
-    [InlineData("clothing")]
-    public void Validate_ValidCategoryIds_ShouldNotHaveError(string categoryId)
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    public void Validate_ValidCategoryIds_ShouldNotHaveError(int categoryId)
     {
         // Arrange
         var command = CreateValidCommand() with { CategoryId = categoryId };
@@ -241,13 +241,13 @@ public class CreateProductCommandValidatorTests
     public void Validate_ZeroOrNegativeLength_ShouldHaveError(decimal length)
     {
         // Arrange
-        var command = CreateValidCommand() with { LengthCm = length };
+        var command = CreateValidCommand() with { DimensionL = length };
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(c => c.LengthCm)
+        result.ShouldHaveValidationErrorFor(c => c.DimensionL)
             .WithErrorMessage("Length must be greater than zero.");
     }
 
@@ -257,13 +257,13 @@ public class CreateProductCommandValidatorTests
     public void Validate_ZeroOrNegativeWidth_ShouldHaveError(decimal width)
     {
         // Arrange
-        var command = CreateValidCommand() with { WidthCm = width };
+        var command = CreateValidCommand() with { DimensionW = width };
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(c => c.WidthCm)
+        result.ShouldHaveValidationErrorFor(c => c.DimensionW)
             .WithErrorMessage("Width must be greater than zero.");
     }
 
@@ -273,13 +273,13 @@ public class CreateProductCommandValidatorTests
     public void Validate_ZeroOrNegativeHeight_ShouldHaveError(decimal height)
     {
         // Arrange
-        var command = CreateValidCommand() with { HeightCm = height };
+        var command = CreateValidCommand() with { DimensionH = height };
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(c => c.HeightCm)
+        result.ShouldHaveValidationErrorFor(c => c.DimensionH)
             .WithErrorMessage("Height must be greater than zero.");
     }
 
@@ -290,9 +290,9 @@ public class CreateProductCommandValidatorTests
         var command = CreateValidCommand() with
         {
             WeightKg = 0.5m,
-            LengthCm = 10m,
-            WidthCm = 10m,
-            HeightCm = 10m
+            DimensionL = 10m,
+            DimensionW = 10m,
+            DimensionH = 10m
         };
 
         // Act
@@ -300,9 +300,9 @@ public class CreateProductCommandValidatorTests
 
         // Assert
         result.ShouldNotHaveValidationErrorFor(c => c.WeightKg);
-        result.ShouldNotHaveValidationErrorFor(c => c.LengthCm);
-        result.ShouldNotHaveValidationErrorFor(c => c.WidthCm);
-        result.ShouldNotHaveValidationErrorFor(c => c.HeightCm);
+        result.ShouldNotHaveValidationErrorFor(c => c.DimensionL);
+        result.ShouldNotHaveValidationErrorFor(c => c.DimensionW);
+        result.ShouldNotHaveValidationErrorFor(c => c.DimensionH);
     }
 
     #endregion
@@ -313,13 +313,13 @@ public class CreateProductCommandValidatorTests
     public void Validate_NegativeStockQuantity_ShouldHaveError()
     {
         // Arrange
-        var command = CreateValidCommand() with { StockQuantity = -1 };
+        var command = CreateValidCommand() with { QuantityAvailable = -1 };
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(c => c.StockQuantity)
+        result.ShouldHaveValidationErrorFor(c => c.QuantityAvailable)
             .WithErrorMessage("Stock quantity cannot be negative.");
     }
 
@@ -330,13 +330,13 @@ public class CreateProductCommandValidatorTests
     public void Validate_ZeroOrPositiveStockQuantity_ShouldNotHaveError(int quantity)
     {
         // Arrange
-        var command = CreateValidCommand() with { StockQuantity = quantity };
+        var command = CreateValidCommand() with { QuantityAvailable = quantity };
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldNotHaveValidationErrorFor(c => c.StockQuantity);
+        result.ShouldNotHaveValidationErrorFor(c => c.QuantityAvailable);
     }
 
     #endregion
@@ -349,28 +349,28 @@ public class CreateProductCommandValidatorTests
         // Arrange
         var command = new CreateProductCommand
         {
-            Name = string.Empty,
-            CategoryId = string.Empty,
-            VendorBasePrice = 0,
+            TitleAr = string.Empty,
+            CategoryId = 0,
+            CostPrice = 0,
             WeightKg = 0,
-            LengthCm = 0,
-            WidthCm = 0,
-            HeightCm = 0,
-            StockQuantity = -1
+            DimensionL = 0,
+            DimensionW = 0,
+            DimensionH = 0,
+            QuantityAvailable = -1
         };
 
         // Act
         var result = _validator.TestValidate(command);
 
         // Assert
-        result.ShouldHaveValidationErrorFor(c => c.Name);
+        result.ShouldHaveValidationErrorFor(c => c.TitleAr);
         result.ShouldHaveValidationErrorFor(c => c.CategoryId);
-        result.ShouldHaveValidationErrorFor(c => c.VendorBasePrice);
+        result.ShouldHaveValidationErrorFor(c => c.CostPrice);
         result.ShouldHaveValidationErrorFor(c => c.WeightKg);
-        result.ShouldHaveValidationErrorFor(c => c.LengthCm);
-        result.ShouldHaveValidationErrorFor(c => c.WidthCm);
-        result.ShouldHaveValidationErrorFor(c => c.HeightCm);
-        result.ShouldHaveValidationErrorFor(c => c.StockQuantity);
+        result.ShouldHaveValidationErrorFor(c => c.DimensionW);
+        result.ShouldHaveValidationErrorFor(c => c.DimensionL);
+        result.ShouldHaveValidationErrorFor(c => c.DimensionH);
+        result.ShouldHaveValidationErrorFor(c => c.QuantityAvailable);
     }
 
     #endregion
@@ -400,17 +400,17 @@ public class CreateProductCommandValidatorTests
     {
         return new CreateProductCommand
         {
-            Name = "Handmade Ceramic Mug",
+            TitleAr = "Handmade Ceramic Mug",
             Description = "A beautifully crafted ceramic mug made by Egyptian artisans.",
-            CategoryId = "home-decor",
-            VendorBasePrice = 150m,
+            CategoryId = 1,
+            CostPrice = 150m,
             StockMode = StockMode.ReadyStock,
-            StockQuantity = 50,
+            QuantityAvailable = 50,
             WeightKg = 0.4m,
-            LengthCm = 12m,
-            WidthCm = 10m,
-            HeightCm = 10m,
-            IsFragile = true
+            DimensionW= 12m,
+            DimensionL= 10m,
+            DimensionH= 10m,
+            IsLocalOnly = true
         };
     }
 

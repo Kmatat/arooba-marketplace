@@ -7,4 +7,4 @@ namespace Arooba.Domain.Events;
 /// Handlers may trigger search index updates, admin review queues, or analytics.
 /// </summary>
 /// <param name="ProductId">The unique identifier of the listed product.</param>
-public sealed record ProductListedEvent(Guid ProductId) : IDomainEvent;
+public sealed record ProductListedEvent(int ProductId) : IDomainEvent;

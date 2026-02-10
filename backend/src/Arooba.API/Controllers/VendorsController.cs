@@ -1,13 +1,11 @@
 using Arooba.Application.Common.Models;
 using Arooba.Application.Features.Vendors.Commands.CreateSubVendor;
 using SubVendorDto = Arooba.Application.Features.Vendors.Queries.SubVendorDto;
-using Arooba.Application.Features.Vendors.Commands.CreateVendor;
-using Arooba.Application.Features.Vendors.Commands.UpdateVendor;
-using Arooba.Application.Features.Vendors.Queries.GetVendorById;
-using Arooba.Application.Features.Vendors.Queries.GetVendors;
 using Arooba.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Arooba.Application.Features.Vendors.Commands;
+using Arooba.Application.Features.Vendors.Queries;
 
 namespace Arooba.API.Controllers;
 
@@ -43,8 +41,8 @@ public class VendorsController : ApiControllerBase
         var query = new GetVendorsQuery
         {
             Status = status,
-            Type = type,
-            Search = search,
+            VendorType = type,
+            SearchTerm = search,
             PageNumber = pageNumber,
             PageSize = pageSize
         };
@@ -61,14 +59,14 @@ public class VendorsController : ApiControllerBase
     /// <returns>The vendor detail including sub-vendors, financial metrics, and status history.</returns>
     /// <response code="200">Vendor found and returned.</response>
     /// <response code="404">Vendor with the specified identifier was not found.</response>
-    [HttpGet("{id:guid}")]
+    [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(VendorDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetVendor(
-        Guid id,
+        int id,
         CancellationToken cancellationToken)
     {
-        var result = await Sender.Send(new GetVendorByIdQuery(id), cancellationToken);
+        var result = await Sender.Send(new GetVendorByIdQuery() { VendorId = id }, cancellationToken);
         return Ok(result);
     }
 
@@ -85,7 +83,7 @@ public class VendorsController : ApiControllerBase
     /// <response code="201">Vendor created successfully and pending review.</response>
     /// <response code="400">Validation failed (e.g., missing required legal documents for legalized vendors).</response>
     [HttpPost]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateVendor(
         [FromBody] CreateVendorCommand command,
@@ -105,16 +103,16 @@ public class VendorsController : ApiControllerBase
     /// <response code="204">Vendor updated successfully.</response>
     /// <response code="400">Validation failed or identifier mismatch.</response>
     /// <response code="404">Vendor with the specified identifier was not found.</response>
-    [HttpPut("{id:guid}")]
+    [HttpPut("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateVendor(
-        Guid id,
+        int id,
         [FromBody] UpdateVendorCommand command,
         CancellationToken cancellationToken)
     {
-        if (id != command.Id)
+        if (id != command.VendorId)
         {
             return BadRequest(new ProblemDetails
             {
@@ -136,14 +134,14 @@ public class VendorsController : ApiControllerBase
     /// <returns>A list of sub-vendors belonging to the parent vendor.</returns>
     /// <response code="200">Sub-vendors retrieved successfully.</response>
     /// <response code="404">Parent vendor with the specified identifier was not found.</response>
-    [HttpGet("{id:guid}/sub-vendors")]
+    [HttpGet("{id:int}/sub-vendors")]
     [ProducesResponseType(typeof(IReadOnlyList<SubVendorDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetSubVendors(
-        Guid id,
+        int id,
         CancellationToken cancellationToken)
     {
-        var vendor = await Sender.Send(new GetVendorByIdQuery(id), cancellationToken);
+        var vendor = await Sender.Send(new GetVendorByIdQuery() { VendorId = id }, cancellationToken);
         // The vendor detail DTO includes sub-vendors; extract them
         return Ok(vendor);
     }
@@ -161,12 +159,12 @@ public class VendorsController : ApiControllerBase
     /// <response code="201">Sub-vendor created successfully.</response>
     /// <response code="400">Validation failed or parent vendor identifier mismatch.</response>
     /// <response code="404">Parent vendor with the specified identifier was not found.</response>
-    [HttpPost("{id:guid}/sub-vendors")]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
+    [HttpPost("{id:int}/sub-vendors")]
+    [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> CreateSubVendor(
-        Guid id,
+        int id,
         [FromBody] CreateSubVendorCommand command,
         CancellationToken cancellationToken)
     {

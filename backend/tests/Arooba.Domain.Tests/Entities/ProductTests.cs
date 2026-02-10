@@ -1,6 +1,7 @@
 using Arooba.Domain.Entities;
 using Arooba.Domain.Enums;
 using FluentAssertions;
+using Xunit;
 
 namespace Arooba.Domain.Tests.Entities;
 
@@ -307,7 +308,7 @@ public class ProductTests
         // Assert
         product.Status.Should().Be(ProductStatus.Draft);
         product.StockMode.Should().Be(StockMode.ReadyStock);
-        product.Name.Should().BeEmpty();
+        product.TitleAr.Should().BeEmpty();
         product.IsFragile.Should().BeFalse();
     }
 

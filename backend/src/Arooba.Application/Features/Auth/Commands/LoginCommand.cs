@@ -25,7 +25,7 @@ public record LoginCommand : IRequest<LoginResultDto>
 public record LoginResultDto
 {
     /// <summary>Gets the user identifier.</summary>
-    public Guid UserId { get; init; }
+    public int UserId { get; init; }
 
     /// <summary>Gets the JWT access token.</summary>
     public string Token { get; init; } = default!;

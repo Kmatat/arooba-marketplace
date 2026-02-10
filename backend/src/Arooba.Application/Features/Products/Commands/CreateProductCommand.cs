@@ -1,3 +1,5 @@
+#nullable enable
+
 using Arooba.Application.Common.Exceptions;
 using Arooba.Application.Common.Interfaces;
 using Arooba.Application.Common.Models;
@@ -13,13 +15,13 @@ namespace Arooba.Application.Features.Products.Commands;
 /// The pricing engine automatically calculates the final price based on
 /// the vendor base price, category uplifts, and vendor type.
 /// </summary>
-public record CreateProductCommand : IRequest<Guid>
+public record CreateProductCommand : IRequest<int>
 {
     /// <summary>The parent vendor creating this product.</summary>
-    public Guid ParentVendorId { get; init; }
+    public int ParentVendorId { get; init; }
 
     /// <summary>Optional sub-vendor who created this product.</summary>
-    public Guid? SubVendorId { get; init; }
+    public int? SubVendorId { get; init; }
 
     /// <summary>Product title in English.</summary>
     public string Title { get; init; } = string.Empty;
@@ -34,7 +36,7 @@ public record CreateProductCommand : IRequest<Guid>
     public string? DescriptionAr { get; init; }
 
     /// <summary>Category ID (e.g., "jewelry-accessories", "home-decor-fragile").</summary>
-    public string CategoryId { get; init; } = string.Empty;
+    public int CategoryId { get; init; }
 
     /// <summary>Vendor's cost price (for margin tracking).</summary>
     public decimal CostPrice { get; init; }
@@ -73,14 +75,14 @@ public record CreateProductCommand : IRequest<Guid>
     public bool IsLocalOnly { get; init; }
 
     /// <summary>Pickup location ID for this product.</summary>
-    public Guid? PickupLocationId { get; init; }
+    public int? PickupLocationId { get; init; }
 }
 
 /// <summary>
 /// Handles product creation with full pricing engine integration.
 /// Calculates the 4-bucket waterfall and sets final price automatically.
 /// </summary>
-public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand, Guid>
+public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand, int>
 {
     private readonly IApplicationDbContext _context;
     private readonly IPricingService _pricingService;
@@ -96,7 +98,7 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
         _dateTime = dateTime;
     }
 
-    public async Task<Guid> Handle(CreateProductCommand request, CancellationToken cancellationToken)
+    public async Task<int> Handle(CreateProductCommand request, CancellationToken cancellationToken)
     {
         var now = _dateTime.UtcNow;
 
@@ -129,7 +131,7 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
 
             if (subVendor is not null)
             {
-                parentUpliftType = subVendor.UpliftType.HasValue.ToString().ToLowerInvariant();
+                parentUpliftType = subVendor.UpliftType?.ToString().ToLowerInvariant();
                 parentUpliftValue = subVendor.UpliftValue;
             }
         }
@@ -137,7 +139,7 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
         // Step 4: Calculate pricing using the pricing engine
         var pricingInput = new PricingInput(
             VendorBasePrice: request.SellingPrice,
-            CategoryId: request.CategoryId,
+            CategoryId: request.CategoryId.ToString(),
             IsVendorVatRegistered: vendor.IsVatRegistered,
             IsNonLegalizedVendor: vendor.VendorType == VendorType.NonLegalized,
             ParentUpliftType: parentUpliftType,
@@ -148,13 +150,13 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
         var pricingResult = _pricingService.CalculatePrice(pricingInput);
 
         // Step 5: Generate SKU
-        var sku = GenerateSku(vendor.BusinessNameAr, request.CategoryId, now);
+        var sku = GenerateSku(vendor.BusinessName, request.CategoryId.ToString(), now);
 
         // Step 6: Calculate volumetric weight
         var volumetricWeight = (request.DimensionL * request.DimensionW * request.DimensionH) / 5000m;
 
         // Step 7: Create the product entity with all pricing fields
-        var productId = Guid.NewGuid();
+        var productId = 0;
         var product = new Product
         {
             Id = productId,
@@ -218,7 +220,7 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
             .Take(5)
             .ToArray());
 
-        var categoryPart = new string(categoryId
+            var categoryPart = new string(categoryId
             .ToUpperInvariant()
             .Replace("-", "")
             .Take(4)
@@ -230,3 +232,5 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
         return $"{vendorPart}-{categoryPart}-{datePart}-{randomPart}";
     }
 }
+
+#nullable restore

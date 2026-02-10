@@ -6,10 +6,10 @@ namespace Arooba.Domain.Entities;
 /// <summary>Represents a Shipment in the Arooba Marketplace domain.</summary>
 public class Shipment : AuditableEntity
 {
-    public Guid OrderId { get; set; }
+    public int OrderId { get; set; }
 
     /// <summary>The pickup location for this shipment.</summary>
-    public Guid PickupLocationId { get; set; }
+    public int PickupLocationId { get; set; }
 
     public string? TrackingNumber { get; set; }
     public string? CourierProvider { get; set; }
@@ -34,4 +34,6 @@ public class Shipment : AuditableEntity
 
     /// <summary>Navigation property to order items in this shipment.</summary>
     public List<OrderItem>? Items { get; set; }
+    public DateTime DeliveredAt { get; set; }
+
 }

@@ -15,11 +15,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Service Registration
 // ---------------------------------------------------------------------------
 
+// Infrastructure layer MUST be registered BEFORE Application layer
+// because Application layer services depend on Infrastructure services
+// (especially IDateTimeService used by handlers and interceptors)
+builder.Services.AddInfrastructureServices(builder.Configuration);
+
 // Application layer: MediatR, FluentValidation, AutoMapper, pipeline behaviors
 builder.Services.AddApplicationServices();
-
-// Infrastructure layer: EF Core, repositories, external service clients
-builder.Services.AddInfrastructureServices(builder.Configuration);
 
 // API layer: controllers with global exception filter, problem details
 builder.Services.AddApiServices();
@@ -151,4 +153,4 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHealthChecks("/health");
 
-app.Run();
+await app.RunAsync();

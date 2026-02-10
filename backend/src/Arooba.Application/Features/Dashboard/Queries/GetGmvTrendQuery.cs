@@ -83,7 +83,7 @@ public class GetGmvTrendQueryHandler : IRequestHandler<GetGmvTrendQuery, List<Gm
         CancellationToken cancellationToken)
     {
         var orders = await _context.Orders
-            .Include(o => o.OrderItems)
+            .Include(o => o.Items)
             .Where(o => o.CreatedAt >= request.DateFrom && o.CreatedAt <= request.DateTo)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
@@ -101,7 +101,7 @@ public class GetGmvTrendQueryHandler : IRequestHandler<GetGmvTrendQuery, List<Gm
             {
                 var gmv = g.Sum(o => o.TotalAmount);
                 var orderCount = g.Count();
-                var commission = g.SelectMany(o => o.OrderItems ?? Enumerable.Empty<Domain.Entities.OrderItem>())
+                var commission = g.SelectMany(o => o.Items ?? Enumerable.Empty<Domain.Entities.OrderItem>())
                     .Sum(oi => oi.CommissionAmount);
 
                 return new GmvTrendDataPoint

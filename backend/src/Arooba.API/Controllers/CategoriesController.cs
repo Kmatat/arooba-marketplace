@@ -39,7 +39,7 @@ public class CategoriesController : ApiControllerBase
     [ProducesResponseType(typeof(CategoryDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetCategory(
-        string id,
+        int id,
         CancellationToken cancellationToken)
     {
         var result = await Sender.Send(new GetCategoryByIdQuery(id), cancellationToken);

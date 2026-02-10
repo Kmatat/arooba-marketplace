@@ -13,7 +13,7 @@ namespace Arooba.Application.Features.Customers.Queries;
 public record GetCustomerPerformanceQuery : IRequest<CustomerPerformanceDto>
 {
     /// <summary>Gets the customer identifier.</summary>
-    public Guid CustomerId { get; init; }
+    public int CustomerId { get; init; }
 }
 
 /// <summary>
@@ -21,7 +21,7 @@ public record GetCustomerPerformanceQuery : IRequest<CustomerPerformanceDto>
 /// </summary>
 public record CustomerPerformanceDto
 {
-    public Guid CustomerId { get; init; }
+    public int CustomerId { get; init; }
 
     // Loyalty
     public int PointsEarned { get; init; }

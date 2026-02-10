@@ -7,8 +7,8 @@ namespace Arooba.Domain.Events;
 /// Raised when an admin reviews (approves or rejects) a vendor action request.
 /// </summary>
 public record VendorActionReviewedEvent(
-    Guid RequestId,
-    Guid VendorId,
+    int RequestId,
+    int VendorId,
     VendorActionType ActionType,
     ApprovalStatus NewStatus,
     string ReviewedBy

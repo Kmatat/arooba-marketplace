@@ -12,7 +12,7 @@ public record GetUserActivityLogQuery : IRequest<UserActivityLogResultDto>
 {
     public DateTime? DateFrom { get; init; }
     public DateTime? DateTo { get; init; }
-    public Guid? UserId { get; init; }
+    public int? UserId { get; init; }
     public UserActivityAction? ActionFilter { get; init; }
     public int Page { get; init; } = 1;
     public int PageSize { get; init; } = 50;
@@ -20,14 +20,14 @@ public record GetUserActivityLogQuery : IRequest<UserActivityLogResultDto>
 
 public record UserActivityLogItemDto
 {
-    public Guid Id { get; init; }
-    public Guid UserId { get; init; }
+    public int Id { get; init; }
+    public int UserId { get; init; }
     public string UserName { get; init; } = string.Empty;
     public UserActivityAction Action { get; init; }
-    public Guid? ProductId { get; init; }
+    public int? ProductId { get; init; }
     public string? ProductTitle { get; init; }
     public string? CategoryId { get; init; }
-    public Guid? OrderId { get; init; }
+    public int? OrderId { get; init; }
     public string? SearchQuery { get; init; }
     public string? SessionId { get; init; }
     public string? DeviceType { get; init; }
